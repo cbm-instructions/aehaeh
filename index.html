@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Divs drehen</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <ul class='circle-container'>
+        <li>1</li>
+        <li>2</li>
+        <li>3</li>
+        <li>4</li>
+        <li>5</li>
+        <li>6</li>
+        <li>7</li>
+        <li>8</li>
+    </ul>
+    <div id="button-left" onclick="moveForward()">Zurück</div>
+    <div id="button-right" onclick="moveBackward()">Weiter</div>
+    <script>
+        const elements = document.querySelectorAll('.circle-container li');
+
+        function moveForward() {
+            const firstElement = document.querySelector('.circle-container li');
+            //const lastElement = document.querySelector('.circle-container li:last-child');
+            //firstElement.style.transform = `rotate(${parseInt(firstElement.style.transform.split('(')[1]) + 45}deg) translate(10em) rotate(-${parseInt(firstElement.style.transform.split('(')[1]) + 45}deg)`;
+            document.querySelector('.circle-container').appendChild(firstElement);
+        }
+
+        function moveBackward() {
+            //const firstElement = document.querySelector('.circle-container li');
+            const lastElement = document.querySelector('.circle-container li:last-child');
+            //lastElement.style.transform = `rotate(${parseInt(lastElement.style.transform.split('(')[1]) - 45}deg) translate(10em) rotate(-${parseInt(lastElement.style.transform.split('(')[1]) - 45}deg)`;
+            document.querySelector('.circle-container').prepend(lastElement);
+        }
+    </script>
+</body>
+</html>
