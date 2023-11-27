@@ -33,6 +33,33 @@
             //lastElement.style.transform = `rotate(${parseInt(lastElement.style.transform.split('(')[1]) - 45}deg) translate(10em) rotate(-${parseInt(lastElement.style.transform.split('(')[1]) - 45}deg)`;
             document.querySelector('.circle-container').prepend(lastElement);
         }
+
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        socket.on('connect', function() {
+            console.log('Connected to server');
+        });
+
+        socket.on('new_value', function(data) {
+            if (data.ok) {
+
+            }
+
+            // Wenn das Ereignis 'back' empfangen wird
+            if (data.back) {
+
+            }
+
+            // Wenn das Ereignis 'right' empfangen wird
+            if (data.right) {
+              moveForward();
+            }
+
+            // Wenn das Ereignis 'left' empfangen wird
+            if (data.left) {
+                moveBackward();
+            }
+        });
     </script>
 </body>
 </html>
