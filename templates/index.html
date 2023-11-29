@@ -13,18 +13,20 @@
 <body>
     <div class="filler"></div>
    <ul class='circle-container'></ul>
-    <script>
-        fetch('./data.json')
-            .then(response => response.json())
-            .then(data => {
-                let ulElement = document.querySelector(".circle-container")
-                for (let i = 0; i < data["tableNumber"].length; i++){
-                    let liElement = document.createElement('li');
-                    liElement.appendChild(document.createTextNode(data["tableNumber"][i]))
-                    ulElement.appendChild(liElement)
-                };
-            })
-    </script>
+<script>
+    fetch('./data.json')
+        .then(response => response.json())
+        .then(data => {
+            let ulElement = document.querySelector(".circle-container");
+            //let dataArray = data["uhrzeit"]["stunde"];
+            let dataArray = data["tischNummer"];
+            for (let i = 0; i < dataArray.length; i++) {
+                let liElement = document.createElement('li');
+                liElement.appendChild(document.createTextNode(dataArray[i]))
+                ulElement.appendChild(liElement)
+            };
+        })
+</script>
     <div class="label">
         Tisch Nr.
     </div>
