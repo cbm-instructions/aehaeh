@@ -12,16 +12,19 @@
 </head>
 <body>
     <div class="filler"></div>
-    <ul class='circle-container'>
-        <li>1</li>
-        <li>2</li>
-        <li>3</li>
-        <li>4</li>
-        <li>5</li>
-        <li>6</li>
-        <li>7</li>
-        <li>8</li>
-    </ul>
+   <ul class='circle-container'></ul>
+    <script>
+        fetch('./data.json')
+            .then(response => response.json())
+            .then(data => {
+                let ulElement = document.querySelector(".circle-container")
+                for (let i = 0; i < data["tableNumber"].length; i++){
+                    let liElement = document.createElement('li');
+                    liElement.appendChild(document.createTextNode(data["tableNumber"][i]))
+                    ulElement.appendChild(liElement)
+                };
+            })
+    </script>
     <div class="label">
         Tisch Nr.
     </div>
