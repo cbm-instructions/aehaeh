@@ -92,3 +92,14 @@ body {
     bottom: 20px;
     right: 20px;
 }
+
+#button-turn-backward{
+    position: absolute;
+    bottom: 20px;
+    left: 200px;
+}
+#button-turn-forward{
+    position: absolute;
+    bottom:20px;
+    right: 200px;
+}

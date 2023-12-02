@@ -8,80 +8,107 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=M+PLUS+2:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=M+PLUS+2:wght@400;500;600&display=swap"
+          rel="stylesheet">
 </head>
 <body>
-    <div class="filler"></div>
-   <ul class='circle-container'></ul>
+<div class="filler"></div>
+<ul class='circle-container' id="circle-container"></ul>
 <script>
     fetch('./data.json')
         .then(response => response.json())
         .then(data => {
-            let ulElement = document.querySelector(".circle-container");
-            let dataArray = data["datum"];
-            //let dataArray = data["uhrzeit"]["stunde"];
-            //let dataArray = data["tischNummer"];
-            for (let i = 0; i < dataArray.length; i++) {
-                let liElement = document.createElement('li');
-                liElement.appendChild(document.createTextNode(dataArray[i]))
-                ulElement.appendChild(liElement)
-            };
+            // Vordefinierte Datentypen (Tischnummern, Datum, Uhrzeit, etc.)
+            let dataTypes = ["Tisch Nr.", "Datum", "Stunde", "Minute", "Dauer"];
+
+            let ulElement = document.getElementById("circle-container");
+            let labelElement = document.getElementById("label");
+            let dataTypeIndex = 0;
+
+            function updateDataDisplay() {
+                let dataArray = data[dataTypes[dataTypeIndex]];
+                ulElement.innerHTML = ''; // Leert den Circle-Container
+
+                for (let i = 0; i < dataArray.length; i++) {
+                    let liElement = document.createElement('li');
+                    liElement.appendChild(document.createTextNode(dataArray[i]))
+                    ulElement.appendChild(liElement)
+                }
+                labelElement.innerText = dataTypes[dataTypeIndex];
+            }
+
+            updateDataDisplay(); // Initialanzeige
+
+            document.getElementById("button-left").addEventListener("click", function () {
+                dataTypeIndex = (dataTypeIndex - 1 + dataTypes.length) % dataTypes.length;
+                updateDataDisplay();
+            });
+
+            document.getElementById("button-right").addEventListener("click", function () {
+                dataTypeIndex = (dataTypeIndex + 1) % dataTypes.length;
+                updateDataDisplay();
+            });
         })
 </script>
-    <div class="label">
-        Tisch Nr.
-    </div>
-    <div id="button-left" class="button" onclick="moveForward()">
-        Zurück
-        <div class="underline"></div>
-    </div>
-    <div id="button-right" class="button" onclick="moveBackward()">
-        Weiter
-        <div class="underline"></div>
-    </div>
-    <script>
-        const elements = document.querySelectorAll('.circle-container li');
+<div class="label" id="label"></div>
+<div id="button-left" class="button">
+    Zurück
+    <div class="underline"></div>
+</div>
+<div id="button-turn-backward" class="button" onclick="moveForward()">
+    Rückwärts
+    <div class="underline"></div>
+</div>
+<div id="button-turn-forward" class="button" onclick="moveBackward()">
+    Vorwärts
+    <div class="underline"></div>
+</div>
 
-        function moveBackward() {
-            const firstElement = document.querySelector('.circle-container li');
-            //const lastElement = document.querySelector('.circle-container li:last-child');
-            //firstElement.style.transform = `rotate(${parseInt(firstElement.style.transform.split('(')[1]) + 45}deg) translate(10em) rotate(-${parseInt(firstElement.style.transform.split('(')[1]) + 45}deg)`;
-            document.querySelector('.circle-container').appendChild(firstElement);
+<div id="button-right" class="button">
+    Weiter
+    <div class="underline"></div>
+</div>
+<script>
+    function moveBackward() {
+        const firstElement = document.querySelector('.circle-container li');
+        //const lastElement = document.querySelector('.circle-container li:last-child');
+        //firstElement.style.transform = `rotate(${parseInt(firstElement.style.transform.split('(')[1]) + 45}deg) translate(10em) rotate(-${parseInt(firstElement.style.transform.split('(')[1]) + 45}deg)`;
+        document.querySelector('.circle-container').appendChild(firstElement);
+    }
+
+    function moveForward() {
+        //const firstElement = document.querySelector('.circle-container li');
+        const lastElement = document.querySelector('.circle-container li:last-child');
+        //lastElement.style.transform = `rotate(${parseInt(lastElement.style.transform.split('(')[1]) - 45}deg) translate(10em) rotate(-${parseInt(lastElement.style.transform.split('(')[1]) - 45}deg)`;
+        document.querySelector('.circle-container').prepend(lastElement);
+    }
+
+    var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+    socket.on('connect', function () {
+        console.log('Connected to server');
+    });
+
+    socket.on('new_value', function (data) {
+        if (data.ok) {
+            alert("weiter");
         }
 
-        function moveForward() {
-            //const firstElement = document.querySelector('.circle-container li');
-            const lastElement = document.querySelector('.circle-container li:last-child');
-            //lastElement.style.transform = `rotate(${parseInt(lastElement.style.transform.split('(')[1]) - 45}deg) translate(10em) rotate(-${parseInt(lastElement.style.transform.split('(')[1]) - 45}deg)`;
-            document.querySelector('.circle-container').prepend(lastElement);
+        // Wenn das Ereignis 'back' empfangen wird
+        if (data.back) {
+            alert("zurück");
         }
 
-        var socket = io.connect('http://' + document.domain + ':' + location.port);
+        // Wenn das Ereignis 'right' empfangen wird
+        if (data.right) {
+            moveForward();
+        }
 
-        socket.on('connect', function() {
-            console.log('Connected to server');
-        });
-
-        socket.on('new_value', function(data) {
-            if (data.ok) {
-                alert("weiter");
-            }
-
-            // Wenn das Ereignis 'back' empfangen wird
-            if (data.back) {
-                alert("zurück");
-            }
-
-            // Wenn das Ereignis 'right' empfangen wird
-            if (data.right) {
-              moveForward();
-            }
-
-            // Wenn das Ereignis 'left' empfangen wird
-            if (data.left) {
-                moveBackward();
-            }
-        });
-    </script>
+        // Wenn das Ereignis 'left' empfangen wird
+        if (data.left) {
+            moveBackward();
+        }
+    });
+</script>
 </body>
 </html>
