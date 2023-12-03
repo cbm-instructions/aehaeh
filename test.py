@@ -36,15 +36,24 @@ counter = 0
 # okLastState = GPIO.input(back)
 
 # database list
+
+id_counter = 0
 current_user_values = {
-    "ID": "",
-    "Tischnummer": "",
+    "ID": id_counter,
+    "Tisch Nr.": "",
     "Datum": "",
     "Stunde": "",
     "Minute": "",
     "Dauer": "",
 }
 
+def reset_current_user_values():
+    current_user_values["ID"] = str(id_counter+1)
+    current_user_values["Tisch Nr."] = ""
+    current_user_values["Datum"] = ""
+    current_user_values["Stunde"] = ""
+    current_user_values["Minute"] = ""
+    current_user_values["Dauer"] = ""
 
 # def read_from_rfid():
 #    reader = SimpleMFRC522()
@@ -112,7 +121,7 @@ def write_reservation_to_database():
     cursor = connection.cursor()
     try:
         query = "INSERT INTO Reservations(ID, Tischnummer, Datum, Stunde, Minute, Dauer) VALUES (?,?,?,?,?,?)"
-        values = (current_user_values["ID"], current_user_values["Tischnummer"], current_user_values["Datum"],
+        values = (current_user_values["ID"], current_user_values["Tisch Nr."], current_user_values["Datum"],
                   current_user_values["Stunde"], current_user_values["Minute"],
                   current_user_values["Dauer"])
 
@@ -143,6 +152,20 @@ def remove_reservation_from_database(user_id, tischnummer, datum, stunde, minute
 def update_value():
     print("Auto update!")
     socketio.emit('new_value', {'value': 'false'})
+
+@socketio.on('update_current_user_values')
+def update_current_user_values(data):
+    key = data['key']
+    value = data['value']
+    current_user_values[key] = value
+    print(f"Updated current_user_values[{key}] to {value}")
+
+    if key == 'Dauer':
+        create_table_reservations()
+        write_reservation_to_database()
+        reset_current_user_values()
+
+
 
 
 # def clkClicked(channel):

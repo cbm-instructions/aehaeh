@@ -1,16 +1,14 @@
 fetch('../static/JSON/data.json')
     .then(response => response.json())
     .then(data => {
-        // Vordefinierte Datentypen (Tischnummern, Datum, Uhrzeit, etc.)
         let dataTypes = ["Tisch Nr.", "Datum", "Stunde", "Minute", "Dauer"];
-
         let ulElement = document.getElementById("circle-container");
         let labelElement = document.getElementById("label");
         let dataTypeIndex = 0;
 
         function updateDataDisplay() {
             let dataArray = data[dataTypes[dataTypeIndex]];
-            ulElement.innerHTML = ''; // Leert den Circle-Container
+            ulElement.innerHTML = '';
 
             for (let i = 0; i < dataArray.length; i++) {
                 let liElement = document.createElement('li');
@@ -18,18 +16,31 @@ fetch('../static/JSON/data.json')
                 ulElement.appendChild(liElement)
             }
             labelElement.innerText = dataTypes[dataTypeIndex];
+            updateButtonDisplay();
+        }
+
+        function updateButtonDisplay() {
+            const buttonLeft = document.getElementById("button-left");
+
+            buttonLeft.style.display = (dataTypes[dataTypeIndex] === "Tisch Nr.") ? "none" : "block";
         }
 
         updateDataDisplay(); // Initialanzeige
-
         document.getElementById("button-left").addEventListener("click", function () {
             dataTypeIndex = (dataTypeIndex - 1 + dataTypes.length) % dataTypes.length;
             updateDataDisplay();
         });
 
         document.getElementById("button-right").addEventListener("click", function () {
+            let label = dataTypes[dataTypeIndex];
+
+            const fourthLiElement = document.querySelector('.circle-container li:nth-child(4)');;
+            const selectedValue = fourthLiElement.innerText;
+            socket.emit('update_current_user_values', {key: label, value: selectedValue});
+
             dataTypeIndex = (dataTypeIndex + 1) % dataTypes.length;
             updateDataDisplay();
+
         });
     })
 
