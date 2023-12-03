@@ -163,10 +163,8 @@ def update_current_user_values(data):
     if key == 'Dauer':
         create_table_reservations()
         write_reservation_to_database()
+        read_all_reservations_for_user(id_counter)
         reset_current_user_values()
-
-
-
 
 # def clkClicked(channel):
 #        global counter
