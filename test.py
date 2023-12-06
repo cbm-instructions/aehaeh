@@ -96,10 +96,9 @@ def create_table_reservations():
                            ID TEXT,
                            Tischnummer TEXT,
                            Datum TEXT,
-                           Stunde TEXT,
-                           Minute TEXT,
+                           Uhrzeit TEXT,
                            Dauer TEXT,
-                           PRIMARY KEY (ID, Tischnummer, Datum)
+                           PRIMARY KEY (ID, Tischnummer, Datum, Uhrzeit)
                        )''')
     finally:
         cursor.close()
@@ -109,14 +108,14 @@ def create_table_reservations():
 def read_all_reservations_for_user(user_id):
     connection = sqlite3.connect("reservations.db")
     cursor = connection.cursor()
-    entryFound = False
+    entry_found = False
 
     try:
-        while not entryFound:
+        while not entry_found:
             # text = read_from_rfid()
             user_id = user_id
             cursor.execute(
-                "SELECT Tischnummer, Datum, Stunde, Minute, Dauer FROM Reservations WHERE ID=?",
+                "SELECT Tischnummer, Datum, Uhrzeit, Dauer FROM Reservations WHERE ID=?",
                 (user_id,)
             )
             rows = cursor.fetchall()
@@ -128,11 +127,10 @@ def read_all_reservations_for_user(user_id):
                 for row in rows:
                     print("Tischnummer: ", row[0])
                     print("Datum: ", row[1])
-                    print("Stunde: ", row[2])
-                    print("Minute: ", row[3])
-                    print("Dauer: ", row[4])
+                    print("Uhrzeit: ", row[2])
+                    print("Dauer: ", row[3])
                     print("---------------")
-                entryFound = True
+                entry_found = True
     finally:
         cursor.close()
         connection.close()
@@ -142,9 +140,9 @@ def write_reservation_to_database():
     connection = sqlite3.connect("reservations.db")
     cursor = connection.cursor()
     try:
-        query = "INSERT INTO Reservations(ID, Tischnummer, Datum, Stunde, Minute, Dauer) VALUES (?,?,?,?,?,?)"
+        query = "INSERT INTO Reservations(ID, Tischnummer, Datum, Uhrzeit, Dauer) VALUES (?,?,?,?,?)"
         values = (current_user_values["ID"], current_user_values["Tisch Nr."], current_user_values["Datum"],
-                  current_user_values["Stunde"], current_user_values["Minute"],
+                  current_user_values["Uhrzeit"],
                   current_user_values["Dauer"])
 
         cursor.execute(query, values)
@@ -157,13 +155,13 @@ def write_reservation_to_database():
         connection.close()
 
 
-def remove_reservation_from_database(user_id, tischnummer, datum, stunde, minute, dauer):
+def remove_reservation_from_database(user_id, tischnummer, datum, uhrzeit, dauer):
     connection = sqlite3.connect("reservations.db")
     cursor = connection.cursor()
     try:
         cursor.execute(
-            "DELETE FROM Reservations WHERE ID=? AND Tischnummer=? AND Datum=? AND Stunde=? AND 'Minute'=? AND Dauer=?",
-            (user_id, tischnummer, datum, stunde, minute, dauer))
+            "DELETE FROM Reservations WHERE ID=? AND Tischnummer=? AND Datum=? AND Uhrzeit=? AND Dauer=?",
+            (user_id, tischnummer, datum, uhrzeit, dauer))
     finally:
         cursor.close()
         connection.close()
@@ -233,13 +231,13 @@ def index():
 
 
 if __name__ == '__main__':
-    #app.run(debug=True, host='0.0.0.0')
-    client = mqtt.Client()
-    client.connect("localhost", 1883, 60)
-    client.subscribe("#")
-    client.on_message = on_message
+    app.run(debug=True, host='0.0.0.0')
+    #client = mqtt.Client()
+    #client.connect("localhost", 1883, 60)
+    #client.subscribe("#")
+    #client.on_message = on_message
 
-    client.loop_forever()
+    #client.loop_forever()
     # create_table_reservations()
     # current_user_values["ID"] = "2120548"
     # current_user_values["Tischnummer"] = "4"

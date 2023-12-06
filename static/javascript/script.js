@@ -46,15 +46,21 @@ fetch('../static/JSON/data.json')
 
         document.getElementById("button-right").addEventListener("click", function () {
             let label = data[dataTypeIndex].name;
+            let selectedValue = "";
 
-            const fourthLiElement = document.querySelector('.circle-container li:nth-child(4)');
-            ;
-            const selectedValue = fourthLiElement.innerText;
+            if (label == "Uhrzeit"){
+                const fourthLiElementInFirstCircle = document.querySelector('.circle-container li:nth-child(4)');
+                const fourthLiElementInSecondCircle = document.querySelector('#circle-container2 li:nth-child(4)');
+                selectedValue = fourthLiElementInFirstCircle.innerText + ":" + fourthLiElementInSecondCircle.innerText;
+
+            }
+            else{
+                const fourthLiElement = document.querySelector('.circle-container li:nth-child(4)');
+                selectedValue = fourthLiElement.innerText;
+            }
             socket.emit('update_current_user_values', {key: label, value: selectedValue});
-
             dataTypeIndex = (dataTypeIndex + 1) % data.length;
             updateDataDisplay();
-
         });
     })
 
