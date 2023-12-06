@@ -29,7 +29,7 @@ app.config['SECRET_KEY'] = 'secret'
 socketio = SocketIO(app)
 
 # os.system('clear')  # clear screen, this is just for the OCD purposes
-os.system('cls')
+#  os.system('cls')
 step = 5  # linear steps for increasing/decreasing volume
 
 # tell to GPIO library to use logical PIN names/numbers, instead of the physical PIN numbers
@@ -53,8 +53,23 @@ counter = 0
 # backLastState = GPIO.input(back)
 # okLastState = GPIO.input(back)
 
-# database list
+#MQTT Settings
+broker_address = "localhost"
+port = 8883
+topic = "test_topic"
 
+username = "user"
+password = "Test123"
+
+client = mqtt.Client()
+client.username_pw_set(username, password)
+client.connect(broker_address, port, 60)
+client.subscribe("test_topic")
+client.on_message = on_message
+client.loop_forever()
+
+
+# database list
 id_counter = 0
 current_user_values = {
     "ID": id_counter,
@@ -232,20 +247,6 @@ def index():
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
-    #client = mqtt.Client()
-    #client.connect("localhost", 1883, 60)
-    #client.subscribe("#")
-    #client.on_message = on_message
 
-    #client.loop_forever()
-    # create_table_reservations()
-    # current_user_values["ID"] = "2120548"
-    # current_user_values["Tischnummer"] = "4"
-    # current_user_values["Datum"] = "15.12.2022"
-    # current_user_values["Stunde"] = "14"
-    # current_user_values["Minute"] = "30"
-    # current_user_values["Dauer"] = "240"
-    # write_reservation_to_database()
-    # read_all_reservations_for_user("2120548")
 
 # GPIO.cleanup()
