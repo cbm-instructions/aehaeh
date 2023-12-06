@@ -1,13 +1,14 @@
 fetch('../static/JSON/data.json')
     .then(response => response.json())
     .then(data => {
-        let dataTypes = ["Tisch Nr.", "Datum", "Stunde", "Minute", "Dauer"];
         let ulElement = document.getElementById("circle-container");
+        let ulElement2 = document.getElementById("circle-container2");
         let labelElement = document.getElementById("label");
         let dataTypeIndex = 0;
 
         function updateDataDisplay() {
-            let dataArray = data[dataTypes[dataTypeIndex]];
+            let selectedData = data[dataTypeIndex];
+            let dataArray = selectedData.firstValues;
             ulElement.innerHTML = '';
 
             for (let i = 0; i < dataArray.length; i++) {
@@ -15,30 +16,43 @@ fetch('../static/JSON/data.json')
                 liElement.appendChild(document.createTextNode(dataArray[i]))
                 ulElement.appendChild(liElement)
             }
-            labelElement.innerText = dataTypes[dataTypeIndex];
+
+            if (selectedData.secondValues != null) {
+                ulElement2.style.display = "block";
+                dataArray = selectedData.secondValues;
+                for (let i = 0; i < dataArray.length; i++) {
+                    let liElement = document.createElement('li');
+                    liElement.appendChild(document.createTextNode(dataArray[i]))
+                    ulElement2.appendChild(liElement)
+                }
+            }else{
+                ulElement2.style.display = "none";
+            }
+            labelElement.innerText = selectedData.name;
             updateButtonDisplay();
         }
 
         function updateButtonDisplay() {
             const buttonLeft = document.getElementById("button-left");
 
-            buttonLeft.style.display = (dataTypes[dataTypeIndex] === "Tisch Nr.") ? "none" : "block";
+            buttonLeft.style.display = (data[dataTypeIndex].name === "Tisch Nr.") ? "none" : "block";
         }
 
         updateDataDisplay(); // Initialanzeige
         document.getElementById("button-left").addEventListener("click", function () {
-            dataTypeIndex = (dataTypeIndex - 1 + dataTypes.length) % dataTypes.length;
+            dataTypeIndex = (dataTypeIndex - 1 + data.length) % data.length;
             updateDataDisplay();
         });
 
         document.getElementById("button-right").addEventListener("click", function () {
-            let label = dataTypes[dataTypeIndex];
+            let label = data[dataTypeIndex].name;
 
-            const fourthLiElement = document.querySelector('.circle-container li:nth-child(4)');;
+            const fourthLiElement = document.querySelector('.circle-container li:nth-child(4)');
+            ;
             const selectedValue = fourthLiElement.innerText;
             socket.emit('update_current_user_values', {key: label, value: selectedValue});
 
-            dataTypeIndex = (dataTypeIndex + 1) % dataTypes.length;
+            dataTypeIndex = (dataTypeIndex + 1) % data.length;
             updateDataDisplay();
 
         });
