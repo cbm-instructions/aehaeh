@@ -11,11 +11,10 @@ import json
 
 def on_message(client, userdata, msg):
     payload = json.loads(msg.payload.decode())
-    card_id = payload['card_id']
-    print("Message received")
+    print(payload)
 
     # Führe deine Reservierungsprüfung durch
-    if card_id != "":
+    if payload != "":
         response = {'status': 'success', 'message': 'Reservierung vorhanden'}
     else:
         response = {'status': 'error', 'message': 'Keine Reservierung gefunden'}
@@ -61,12 +60,6 @@ topic = "test_topic"
 username = "user"
 password = "Test123"
 
-client = mqtt.Client()
-client.username_pw_set(username, password)
-client.connect(broker_address, port, 60)
-client.subscribe("test_topic")
-client.on_message = on_message
-client.loop_forever()
 
 
 # database list
@@ -247,6 +240,13 @@ def index():
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
+    client = mqtt.Client()
+    client.username_pw_set(username, password)
+    client.connect(broker_address, port, 60)
+    client.subscribe("test_topic")
+    client.on_message = on_message
+    client.loop_forever()
+
 
 
 # GPIO.cleanup()
