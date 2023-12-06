@@ -8,27 +8,27 @@ fetch('../static/JSON/data.json')
 
         function updateDataDisplay() {
             let selectedData = data[dataTypeIndex];
-            let dataArray = selectedData.firstValues;
+            labelElement.innerText = selectedData["name"]
+            let firstValues = selectedData.firstValues;
+            let secondValues = selectedData.secondValues;
             ulElement.innerHTML = '';
 
-            for (let i = 0; i < dataArray.length; i++) {
+            for (let i = 0; i < firstValues.length; i++) {
                 let liElement = document.createElement('li');
-                liElement.appendChild(document.createTextNode(dataArray[i]))
+                liElement.appendChild(document.createTextNode(firstValues[i]))
                 ulElement.appendChild(liElement)
             }
 
-            if (selectedData.secondValues != null) {
+            if (secondValues.length != 0) {
                 ulElement2.style.display = "block";
-                dataArray = selectedData.secondValues;
-                for (let i = 0; i < dataArray.length; i++) {
+                for (let i = 0; i < secondValues.length; i++) {
                     let liElement = document.createElement('li');
-                    liElement.appendChild(document.createTextNode(dataArray[i]))
+                    liElement.appendChild(document.createTextNode(secondValues[i]))
                     ulElement2.appendChild(liElement)
                 }
             }else{
                 ulElement2.style.display = "none";
             }
-            labelElement.innerText = selectedData.name;
             updateButtonDisplay();
         }
 
