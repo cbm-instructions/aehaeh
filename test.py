@@ -4,23 +4,43 @@ from flask import Flask, render_template
 from flask_socketio import SocketIO
 # from mfrc522 import SimpleMFRC522
 import sqlite3
-import time
 import paho.mqtt.client as mqtt
+import threading
 import json
 
+class MQTTThread(threading.Thread):
+    def __init__(self, broker_address, port, topic, username, password):
+        super(MQTTThread, self).__init__()
+        self.broker_address = broker_address
+        self.port = port
+        self.topic = topic
+        self.username = username
+        self.password = password
 
-def on_message(client, userdata, msg):
-    payload = json.loads(msg.payload.decode())
-    print(payload)
+    def on_message(self, client, userdata, msg):
+        payload = json.loads(msg.payload.decode())
 
-    # Führe deine Reservierungsprüfung durch
-    if payload != "":
-        response = {'status': 'success', 'message': 'Reservierung vorhanden'}
-    else:
-        response = {'status': 'error', 'message': 'Keine Reservierung gefunden'}
+        if payload != "":
+            response = {'status': 'success', 'message': 'Reservierung vorhanden'}
+        else:
+            response = {'status': 'error', 'message': 'Reservierung nicht gefunden'}
 
-    # Sende die Antwort zurück an den ESP
-    client.publish("response_topic", json.dumps(response))
+        client.publish("response_topic", json.dumps(response))
+
+    def run(self):
+        # Verbindung zum MQTT-Broker herstellen und Benutzername/Passwort übergeben
+        client = mqtt.Client()
+        client.username_pw_set(self.username, self.password)
+        client.connect(self.broker_address, self.port)
+
+        # Callback-Funktion für den Empfang von Nachrichten festlegen
+        client.on_message = self.on_message
+
+        # Auf das gewünschte Topic subscriben
+        client.subscribe(self.topic)
+
+        # Endlosschleife starten, um auf Nachrichten zu warten
+        client.loop_forever()
 
 
 app = Flask(__name__, static_url_path='/static')
@@ -52,24 +72,13 @@ counter = 0
 # backLastState = GPIO.input(back)
 # okLastState = GPIO.input(back)
 
-#MQTT Settings
-broker_address = "localhost"
-port = 8883
-topic = "test_topic"
-
-username = "user"
-password = "Test123"
-
-
-
 # database list
 id_counter = 0
 current_user_values = {
     "ID": id_counter,
     "Tisch Nr.": "",
     "Datum": "",
-    "Stunde": "",
-    "Minute": "",
+    "Uhrzeit": "",
     "Dauer": "",
 }
 
@@ -78,8 +87,7 @@ def reset_current_user_values():
     current_user_values["ID"] = str(id_counter + 1)
     current_user_values["Tisch Nr."] = ""
     current_user_values["Datum"] = ""
-    current_user_values["Stunde"] = ""
-    current_user_values["Minute"] = ""
+    current_user_values["Uhrzeit"] = ""
     current_user_values["Dauer"] = ""
 
 
@@ -239,14 +247,15 @@ def index():
 
 
 if __name__ == '__main__':
+    broker_address = "localhost"
+    port = 8883
+    topic = "test_topic"
+    username = "user"
+    password = "Test123"
+
+    mqtt_thread = MQTTThread(broker_address, port, topic, username, password)
+    mqtt_thread.start()
     app.run(debug=True, host='0.0.0.0')
-    client = mqtt.Client()
-    client.username_pw_set(username, password)
-    client.connect(broker_address, port, 60)
-    client.subscribe("test_topic")
-    client.on_message = on_message
-    client.loop_forever()
-
-
+    mqtt.join()
 
 # GPIO.cleanup()
