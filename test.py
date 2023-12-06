@@ -18,14 +18,14 @@ class MQTTThread(threading.Thread):
         self.password = password
 
     def on_message(self, client, userdata, msg):
-        payload = json.loads(msg.payload.decode())
+        print("Message received")
+        #if msg.payload:
+        #    payload = json.loads(msg.payload.decode())
+        #    response = {'status': 'success', 'message': 'Reservierung vorhanden'}
+        #else:
+        #    response = {'status': 'error', 'message': 'Reservierung nicht gefunden'}
 
-        if payload != "":
-            response = {'status': 'success', 'message': 'Reservierung vorhanden'}
-        else:
-            response = {'status': 'error', 'message': 'Reservierung nicht gefunden'}
-
-        client.publish("response_topic", json.dumps(response))
+        #client.publish("response_topic", json.dumps(response))
 
     def run(self):
         # Verbindung zum MQTT-Broker herstellen und Benutzername/Passwort übergeben
