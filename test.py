@@ -7,39 +7,95 @@ import sqlite3
 import paho.mqtt.client as mqtt
 import threading
 import json
+from datetime import datetime
+import time
+
 
 class MQTTThread(threading.Thread):
-    def __init__(self, broker_address, port, topic, username, password):
+    def __init__(self, broker_address, port, username, password):
         super(MQTTThread, self).__init__()
         self.broker_address = broker_address
         self.port = port
-        self.topic = topic
         self.username = username
         self.password = password
+        self.interval = 60
+
+    def does_reservation_exist(tischnummer):
+        connection = sqlite3.connect("reservations.db")
+        cursor = connection.cursor()
+        entry_found = False
+
+        try:
+            while not entry_found:
+                # text = read_from_rfid()
+                cursor.execute(
+                    "SELECT Tischnummer, Datum, Uhrzeit, Dauer FROM Reservations WHERE Tischnummer=?",
+                    tischnummer
+                )
+                rows = cursor.fetchall()
+
+                if not rows:
+                    continue
+                else:
+                    entry_found = True
+                    break
+            return entry_found
+        finally:
+            cursor.close()
+            connection.close()
+
+    def send_time_message(self, client):
+        while True:
+            aktuelle_zeit = datetime.now()
+            deutsches_datum = aktuelle_zeit.strftime("%d.%m.%Y")
+            deutsche_uhrzeit = aktuelle_zeit.strftime("%H:%M:%S")
+            message = {"Uhrzeit": deutsche_uhrzeit, "Datum": deutsches_datum}
+            client.publish("time", json.dumps(message))
+            time.sleep(self.interval)
+            print("Time sent")
+
+    def on_connect(self, client, userdata, flags, rc):
+        print("Verbunden mit dem MQTT Broker mit dem Result Code: " + str(rc))
+        threading.Thread(target=self.send_time_message, args=(client,), daemon=True).start()
+
+
 
     def on_message(self, client, userdata, msg):
-        print("Message received")
-        #if msg.payload:
-        #    payload = json.loads(msg.payload.decode())
-        #    response = {'status': 'success', 'message': 'Reservierung vorhanden'}
-        #else:
-        #    response = {'status': 'error', 'message': 'Reservierung nicht gefunden'}
-
-        #client.publish("response_topic", json.dumps(response))
+        decoded_payload = msg.payload.decode()
+        if isinstance(decoded_payload, str):
+            print("Received plain text message:", decoded_payload)
+        else:
+            try:
+                message = json.loads(decoded_payload)
+                versions_nummer = message["Versionsnummer"]
+                tisch_nummer = message["Tischnummer"]
+                print("Received JSON message:", message)
+            except json.decoder.JSONDecodeError as e:
+                print(f"Error decoding JSON: {e}")
+                print("Invalid JSON format.")
 
     def run(self):
+        topics = ["denkraum/tisch1/reservierung",
+                  "denkraum/tisch2/reservierung",
+                  "denkraum/tisch3/reservierung",
+                  "denkraum/tisch4/reservierung",
+                  "denkraum/tisch5/reservierung",
+                  "denkraum/tisch6/reservierung",
+                  "denkraum/tisch7/reservierung",
+                  "denkraum/tisch8/reservierung",
+                  "response_topic"
+                  ]
         # Verbindung zum MQTT-Broker herstellen und Benutzername/Passwort übergeben
         client = mqtt.Client()
         client.username_pw_set(self.username, self.password)
         client.connect(self.broker_address, self.port)
 
-        # Callback-Funktion für den Empfang von Nachrichten festlegen
         client.on_message = self.on_message
+        client.on_connect = self.on_connect
 
-        # Auf das gewünschte Topic subscriben
-        client.subscribe(self.topic)
+        for topic in topics:
+            client.subscribe(topic)
 
-        # Endlosschleife starten, um auf Nachrichten zu warten
         client.loop_forever()
 
 
@@ -248,14 +304,13 @@ def index():
 
 if __name__ == '__main__':
     broker_address = "localhost"
-    port = 8883
-    topic = "test_topic"
+    port = 1883
     username = "user"
     password = "Test123"
 
-    mqtt_thread = MQTTThread(broker_address, port, topic, username, password)
+    mqtt_thread = MQTTThread(broker_address, port, username, password)
     mqtt_thread.start()
-    app.run(debug=True, host='0.0.0.0')
-    mqtt.join()
+    #app.run(debug=True, host='0.0.0.0')
+    mqtt_thread.join()
 
 # GPIO.cleanup()
