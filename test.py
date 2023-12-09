@@ -51,8 +51,9 @@ class MQTTThread(threading.Thread):
             deutsche_uhrzeit = aktuelle_zeit.strftime("%H:%M:%S")
             message = {"Uhrzeit": deutsche_uhrzeit, "Datum": deutsches_datum}
             client.publish("time", json.dumps(message))
-            time.sleep(self.interval)
             print("Time sent")
+            time.sleep(self.interval)
+
 
     def on_connect(self, client, userdata, flags, rc):
         print("Verbunden mit dem MQTT Broker mit dem Result Code: " + str(rc))
@@ -308,7 +309,7 @@ if __name__ == '__main__':
 
     mqtt_thread = MQTTThread(broker_address, port, username, password)
     mqtt_thread.start()
-    app.run(debug=True, host='0.0.0.0')
+    app.run(debug=False, host='0.0.0.0')
     mqtt_thread.join()
 
 # GPIO.cleanup()
