@@ -20,7 +20,7 @@ class MQTTThread(threading.Thread):
         self.password = password
         self.interval = 60
 
-    def does_reservation_exist(tischnummer):
+    def does_reservation_exist(self, tischnummer):
         connection = sqlite3.connect("reservations.db")
         cursor = connection.cursor()
         entry_found = False
@@ -47,17 +47,70 @@ class MQTTThread(threading.Thread):
     def send_time_message(self, client):
         while True:
             aktuelle_zeit = datetime.now()
-            deutsches_datum = aktuelle_zeit.strftime("%d.%m.%Y")
-            deutsche_uhrzeit = aktuelle_zeit.strftime("%H:%M:%S")
-            message = {"Uhrzeit": deutsche_uhrzeit, "Datum": deutsches_datum}
+            datum = aktuelle_zeit.strftime("%d.%m.%Y")
+            uhrzeit = aktuelle_zeit.strftime("%H:%M")
+            wochentag = aktuelle_zeit.strftime("%A")
+
+            match wochentag:
+                case "Monday":
+                    wochentag = "Montag"
+                case "Tuesday":
+                    wochentag = "Dienstag"
+                case "Wednesday":
+                    wochentag = "Mittwoch"
+                case "Thursday":
+                    wochentag = "Donnerstag"
+                case "Friday":
+                    wochentag = "Freitag"
+                case "Saturday":
+                    wochentag = "Samstag"
+                case "Sunday":
+                    wochentag = "Sonntag"
+
+            message = {"Uhrzeit": uhrzeit, "Datum": datum, "Wochentag": wochentag}
             client.publish("time", json.dumps(message))
             print("Time sent")
             time.sleep(self.interval)
 
+    def send_all_reservations(self, client):
+        while True:
+            print("Reservations sent")
+            connection = sqlite3.connect("reservations.db")
+            cursor = connection.cursor()
+            reservations = []
+
+            topics = ["denkraum/tisch1/reservierung",
+                      "denkraum/tisch2/reservierung",
+                      "denkraum/tisch3/reservierung",
+                      "denkraum/tisch4/reservierung",
+                      "denkraum/tisch5/reservierung",
+                      "denkraum/tisch6/reservierung",
+                      "denkraum/tisch7/reservierung",
+                      "denkraum/tisch8/reservierung",
+                      ]
+
+            try:
+                for i in range(0, len(topics)):
+                    reservations = []
+                    cursor.execute(
+                        "SELECT ID, Tischnummer, Datum, Uhrzeit, Dauer FROM Reservations WHERE Tischnummer=?",
+                        str(i + 1))
+                    rows = cursor.fetchall()
+                    for row in rows:
+                        reservation = {"Matrikelnummer": row[0], "Tischnummer": row[1], "Datum": row[2],
+                                       "Uhrzeit": row[3], "Dauer": row[4]}
+                        reservations.append(reservation)
+                    json_reservations = json.dumps(reservations)
+                    client.publish(topics[i], json_reservations)
+                time.sleep(60)
+            finally:
+                cursor.close()
+                connection.close()
 
     def on_connect(self, client, userdata, flags, rc):
         print("Verbunden mit dem MQTT Broker mit dem Result Code: " + str(rc))
         threading.Thread(target=self.send_time_message, args=(client,), daemon=True).start()
+        threading.Thread(target=self.send_all_reservations, args=(client,), daemon=True).start()
 
     def on_message(self, client, userdata, msg):
         decoded_payload = msg.payload.decode()
@@ -74,16 +127,7 @@ class MQTTThread(threading.Thread):
                 print("Invalid JSON format.")
 
     def run(self):
-        topics = ["denkraum/tisch1/reservierung",
-                  "denkraum/tisch2/reservierung",
-                  "denkraum/tisch3/reservierung",
-                  "denkraum/tisch4/reservierung",
-                  "denkraum/tisch5/reservierung",
-                  "denkraum/tisch6/reservierung",
-                  "denkraum/tisch7/reservierung",
-                  "denkraum/tisch8/reservierung",
-                  "response_topic"
-                  ]
+
         # Verbindung zum MQTT-Broker herstellen und Benutzername/Passwort übergeben
         client = mqtt.Client()
         client.username_pw_set(self.username, self.password)
@@ -92,8 +136,8 @@ class MQTTThread(threading.Thread):
         client.on_message = self.on_message
         client.on_connect = self.on_connect
 
-        for topic in topics:
-            client.subscribe(topic)
+        # for topic in topics:
+        #    client.subscribe(topic)
 
         client.loop_forever()
 
