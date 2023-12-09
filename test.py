@@ -1,4 +1,3 @@
-import os
 # from RPi import GPIO
 from flask import Flask, render_template
 from flask_socketio import SocketIO
@@ -20,26 +19,18 @@ class MQTTThread(threading.Thread):
         self.password = password
         self.interval = 60
 
-    def does_reservation_exist(self, tischnummer):
+    def does_a_reservation_exist(self, tischnummer):
         connection = sqlite3.connect("reservations.db")
         cursor = connection.cursor()
-        entry_found = False
 
         try:
-            while not entry_found:
-                # text = read_from_rfid()
-                cursor.execute(
-                    "SELECT Tischnummer, Datum, Uhrzeit, Dauer FROM Reservations WHERE Tischnummer=?",
-                    tischnummer
-                )
-                rows = cursor.fetchall()
-
-                if not rows:
-                    continue
-                else:
-                    entry_found = True
-                    break
-            return entry_found
+            cursor.execute("SELECT Tischnummer, Datum, Uhrzeit, Dauer, S FROM Reservations WHERE Tischnummer=?",
+                           tischnummer)
+            rows = cursor.fetchall()
+            if not rows:
+                return False
+            else:
+                return True
         finally:
             cursor.close()
             connection.close()
@@ -77,7 +68,6 @@ class MQTTThread(threading.Thread):
             print("Reservations sent")
             connection = sqlite3.connect("reservations.db")
             cursor = connection.cursor()
-            reservations = []
 
             topics = ["denkraum/tisch1/reservierung",
                       "denkraum/tisch2/reservierung",
@@ -93,12 +83,12 @@ class MQTTThread(threading.Thread):
                 for i in range(0, len(topics)):
                     reservations = []
                     cursor.execute(
-                        "SELECT ID, Tischnummer, Datum, Uhrzeit, Dauer FROM Reservations WHERE Tischnummer=?",
+                        "SELECT ID, Tischnummer, Datum, Uhrzeit, Dauer, Statuscode FROM Reservations WHERE Tischnummer=?",
                         str(i + 1))
                     rows = cursor.fetchall()
                     for row in rows:
                         reservation = {"Matrikelnummer": row[0], "Tischnummer": row[1], "Datum": row[2],
-                                       "Uhrzeit": row[3], "Dauer": row[4]}
+                                       "Uhrzeit": row[3], "Dauer": row[4], "Statuscode": row[5]}
                         reservations.append(reservation)
                     json_reservations = json.dumps(reservations)
                     client.publish(topics[i], json_reservations)
@@ -108,6 +98,7 @@ class MQTTThread(threading.Thread):
                 connection.close()
 
     def on_connect(self, client, userdata, flags, rc):
+        create_table_reservations()
         print("Verbunden mit dem MQTT Broker mit dem Result Code: " + str(rc))
         threading.Thread(target=self.send_time_message, args=(client,), daemon=True).start()
         threading.Thread(target=self.send_all_reservations, args=(client,), daemon=True).start()
@@ -119,9 +110,14 @@ class MQTTThread(threading.Thread):
         else:
             try:
                 message = json.loads(decoded_payload)
-                versions_nummer = message["Versionsnummer"]
-                tisch_nummer = message["Tischnummer"]
+                # versions_nummer = message["Versionsnummer"]
+                # tisch_nummer = message["Tischnummer"]
                 print("Received JSON message:", message)
+
+                # TODO: Prüfe erhaltene Anfrage nach dem erhaltenen Statuscode und
+                #       sende eine entsprechende Response mit Versionsnummer, Tischnummer,
+                #       Dauer der Reservierung und Uhrzeit der Reservierung zurück
+
             except json.decoder.JSONDecodeError as e:
                 print(f"Error decoding JSON: {e}")
                 print("Invalid JSON format.")
@@ -135,10 +131,6 @@ class MQTTThread(threading.Thread):
 
         client.on_message = self.on_message
         client.on_connect = self.on_connect
-
-        # for topic in topics:
-        #    client.subscribe(topic)
-
         client.loop_forever()
 
 
@@ -171,7 +163,6 @@ counter = 0
 # backLastState = GPIO.input(back)
 # okLastState = GPIO.input(back)
 
-# database list
 id_counter = 0
 current_user_values = {
     "ID": id_counter,
@@ -183,12 +174,12 @@ current_user_values = {
 
 
 def reset_current_user_values():
-    current_user_values["ID"] = str(id_counter + 1)
+    current_user_values["ID"] = id_counter
     current_user_values["Tisch Nr."] = ""
     current_user_values["Datum"] = ""
     current_user_values["Uhrzeit"] = ""
     current_user_values["Dauer"] = ""
-
+    current_user_values["Statuscode"] = "0"
 
 # def read_from_rfid():
 #    reader = SimpleMFRC522()
@@ -208,12 +199,13 @@ def create_table_reservations():
 
     try:
         cursor.execute('''CREATE TABLE IF NOT EXISTS Reservations(
-                           ID TEXT,
+                           ID INTEGER AUTO_INCREMENT,
                            Tischnummer TEXT,
                            Datum TEXT,
                            Uhrzeit TEXT,
                            Dauer TEXT,
-                           PRIMARY KEY (ID, Tischnummer, Datum, Uhrzeit)
+                           Statuscode TEXT DEFAULT 0,
+                           UNIQUE(ID, Tischnummer, Datum, Uhrzeit)
                        )''')
     finally:
         cursor.close()
@@ -230,7 +222,7 @@ def read_all_reservations_for_user(user_id):
             # text = read_from_rfid()
             user_id = user_id
             cursor.execute(
-                "SELECT Tischnummer, Datum, Uhrzeit, Dauer FROM Reservations WHERE ID=?",
+                "SELECT ID,Tischnummer, Datum, Uhrzeit, Dauer, Statuscode FROM Reservations WHERE ID=?",
                 (user_id,)
             )
             rows = cursor.fetchall()
@@ -244,6 +236,7 @@ def read_all_reservations_for_user(user_id):
                     print("Datum: ", row[1])
                     print("Uhrzeit: ", row[2])
                     print("Dauer: ", row[3])
+                    print("Statuscode: ", row[4])
                     print("---------------")
                 entry_found = True
     finally:
@@ -255,11 +248,14 @@ def write_reservation_to_database():
     connection = sqlite3.connect("reservations.db")
     cursor = connection.cursor()
     try:
-        query = "INSERT INTO Reservations(ID, Tischnummer, Datum, Uhrzeit, Dauer) VALUES (?,?,?,?,?)"
-        values = (current_user_values["ID"], current_user_values["Tisch Nr."], current_user_values["Datum"],
-                  current_user_values["Uhrzeit"],
-                  current_user_values["Dauer"])
-
+        query = "INSERT INTO Reservations(ID,Tischnummer, Datum, Uhrzeit, Dauer) VALUES (?,?,?,?,?)"
+        values = (
+            current_user_values["ID"],
+            current_user_values["Tisch Nr."],
+            current_user_values["Datum"],
+            current_user_values["Uhrzeit"],
+            current_user_values["Dauer"],
+        )
         cursor.execute(query, values)
         connection.commit()
         print("Record inserted successfully!")
@@ -270,13 +266,13 @@ def write_reservation_to_database():
         connection.close()
 
 
-def remove_reservation_from_database(user_id, tischnummer, datum, uhrzeit, dauer):
+def remove_reservation_from_database(user_id, tischnummer, datum, uhrzeit, dauer, statuscode):
     connection = sqlite3.connect("reservations.db")
     cursor = connection.cursor()
     try:
         cursor.execute(
-            "DELETE FROM Reservations WHERE ID=? AND Tischnummer=? AND Datum=? AND Uhrzeit=? AND Dauer=?",
-            (user_id, tischnummer, datum, uhrzeit, dauer))
+            "DELETE FROM Reservations WHERE ID=? AND Tischnummer=? AND Datum=? AND Uhrzeit=? AND Dauer=? AND  Statuscode=?",
+            (user_id, tischnummer, datum, uhrzeit, dauer, statuscode))
     finally:
         cursor.close()
         connection.close()
@@ -299,7 +295,9 @@ def update_current_user_values(data):
     if key == 'Dauer':
         create_table_reservations()
         write_reservation_to_database()
+        global id_counter
         read_all_reservations_for_user(id_counter)
+        id_counter += 1
         reset_current_user_values()
 
 
