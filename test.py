@@ -58,8 +58,6 @@ class MQTTThread(threading.Thread):
         print("Verbunden mit dem MQTT Broker mit dem Result Code: " + str(rc))
         threading.Thread(target=self.send_time_message, args=(client,), daemon=True).start()
 
-
-
     def on_message(self, client, userdata, msg):
         decoded_payload = msg.payload.decode()
         if isinstance(decoded_payload, str):
@@ -310,7 +308,7 @@ if __name__ == '__main__':
 
     mqtt_thread = MQTTThread(broker_address, port, username, password)
     mqtt_thread.start()
-    #app.run(debug=True, host='0.0.0.0')
+    app.run(debug=True, host='0.0.0.0')
     mqtt_thread.join()
 
 # GPIO.cleanup()
