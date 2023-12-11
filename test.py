@@ -6,7 +6,7 @@ import sqlite3
 import paho.mqtt.client as mqtt
 import threading
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 import time
 
 
@@ -19,18 +19,69 @@ class MQTTThread(threading.Thread):
         self.password = password
         self.interval = 60
 
-    def does_a_reservation_exist(self, tischnummer):
+    def find_next_reservation_if_exists(self, tischnummer, aktuelles_datum, aktuelle_uhrzeit):
         connection = sqlite3.connect("reservations.db")
         cursor = connection.cursor()
 
         try:
-            cursor.execute("SELECT Tischnummer, Datum, Uhrzeit, Dauer, S FROM Reservations WHERE Tischnummer=?",
-                           tischnummer)
+            cursor.execute(
+                "SELECT Uhrzeit FROM Reservations WHERE Tischnummer=? AND Datum=? ORDER BY Uhrzeit",
+                (tischnummer, str(aktuelles_datum)))
             rows = cursor.fetchall()
+
+            # Aktuelle Uhrzeit entspricht keiner Reservierung
             if not rows:
-                return False
-            else:
-                return True
+                return None
+            aktuelle_uhrzeit_dt = datetime.strptime(aktuelle_uhrzeit, "%H:%M")
+            reservierte_zeiten = [datetime.strptime(row[0], "%H:%M") for row in rows]
+
+            # Runde die aktuelle Uhrzeit auf das nächste 15-Minuten-Intervall auf
+            minutes_remainder = aktuelle_uhrzeit_dt.minute % 15
+            if minutes_remainder != 0:
+                aktuelle_uhrzeit_dt += timedelta(minutes=15 - minutes_remainder)
+
+            # Durchsuche die Reservierungen und finde die nächste freie Uhrzeit im 15-Minuten-Intervall.
+            next_reservation_time = aktuelle_uhrzeit_dt
+            while next_reservation_time not in reservierte_zeiten:
+                next_reservation_time += timedelta(minutes=15)
+
+            return next_reservation_time.strftime("%H:%M")
+        finally:
+            cursor.close()
+            connection.close()
+
+    def does_a_reservation_exist(self, user_id, tischnummer, aktuelles_datum, aktuelle_uhrzeit):
+        connection = sqlite3.connect("reservations.db")
+        cursor = connection.cursor()
+
+        try:
+            ## Rundet die aktuelle Uhrzeit im 15 Minuten Takt auf
+            aktuelle_uhrzeit_dt = datetime.strptime(aktuelle_uhrzeit, "%H:%M")
+            minuten_rest = aktuelle_uhrzeit_dt.minute % 15
+            if minuten_rest != 0:
+                aktuelle_uhrzeit_dt += timedelta(minutes=(15 - minuten_rest))
+            print("Aktuelle Uhrzeit:", aktuelle_uhrzeit_dt)
+
+            cursor.execute(
+                "SELECT ID, Tischnummer, Datum, Uhrzeit, Dauer, Statuscode FROM Reservations WHERE ID=? AND Tischnummer=? AND Datum=?",
+                (user_id, tischnummer, aktuelles_datum))
+            rows = cursor.fetchall()
+
+            if not rows:
+                next_reservation_time = self.find_next_reservation_if_exists(tischnummer, aktuelles_datum,
+                                                                             aktuelle_uhrzeit)
+                return False, None, None, next_reservation_time
+
+            for row in rows:
+                max_zeit = aktuelle_uhrzeit_dt + timedelta(minutes=30)
+                reservierungs_datum = datetime.strptime(row[2], "%d.%m.%Y")
+                reservierungs_uhrzeit = datetime.strptime(row[3], "%H:%M")
+                print("Reservierungs-Uhrzeit:", reservierungs_uhrzeit.strftime("%H:%M"), "Aktuelle-Uhrzeit:",
+                      aktuelle_uhrzeit_dt.strftime("%H:%M"),
+                      "Maximale-Uhrzeit", max_zeit.strftime("%H:%M"))
+                if aktuelle_uhrzeit_dt <= reservierungs_uhrzeit <= max_zeit:
+                    return True, str(reservierungs_datum.strftime("%d.%m.%Y")), str(
+                        reservierungs_uhrzeit.strftime("%H:%M")), None
         finally:
             cursor.close()
             connection.close()
@@ -104,19 +155,37 @@ class MQTTThread(threading.Thread):
         threading.Thread(target=self.send_all_reservations, args=(client,), daemon=True).start()
 
     def on_message(self, client, userdata, msg):
-        decoded_payload = msg.payload.decode()
-        if isinstance(decoded_payload, str):
-            print("Received plain text message:", decoded_payload)
+        if isinstance(msg, str):
+            print("Received plain text message:", msg)
         else:
             try:
+                decoded_payload = msg.payload.decode()
                 message = json.loads(decoded_payload)
-                # versions_nummer = message["Versionsnummer"]
-                # tisch_nummer = message["Tischnummer"]
                 print("Received JSON message:", message)
 
-                # TODO: Prüfe erhaltene Anfrage nach dem erhaltenen Statuscode und
-                #       sende eine entsprechende Response mit Versionsnummer, Tischnummer,
-                #       Dauer der Reservierung und Uhrzeit der Reservierung zurück
+                if msg.topic == "denkraum/checkin":
+                    user_id = message["ID"]
+                    versions_nummer = message["Versionsnummer"]
+                    tisch_nummer = message["Tischnummer"]
+                    aktuelle_zeit = datetime.now()
+                    aktuelles_datum = aktuelle_zeit.strftime("%d.%m.%Y")
+                    aktuelle_uhrzeit = aktuelle_zeit.strftime("%H:%M")
+                    reserviert, datum, uhrzeit, next_free_time = self.does_a_reservation_exist(user_id, tisch_nummer,
+                                                                                               aktuelles_datum,
+                                                                                               aktuelle_uhrzeit)
+
+                    response = ""
+
+                    if reserviert:
+                        response = {"ID": user_id, "Tischnummer": tisch_nummer, "Versionsnummer": versions_nummer,
+                                    "Reservierungsdatum": datum, "Reservierungsuhrzeit": uhrzeit,
+                                    "Reservierungsdauer": "", "reserviert": "True"}
+                    else:
+                        response = {"ID": user_id, "Tischnummer": tisch_nummer, "Versionsnummer": versions_nummer,
+                                    "UhrzeitNächsteReservierung": str(next_free_time), "reserviert": "False"}
+
+                    client.publish("denkraum/response", json.dumps(response))
+                    print("Response sent. Result of Reservation", response)
 
             except json.decoder.JSONDecodeError as e:
                 print(f"Error decoding JSON: {e}")
@@ -131,6 +200,7 @@ class MQTTThread(threading.Thread):
 
         client.on_message = self.on_message
         client.on_connect = self.on_connect
+        client.subscribe("denkraum/checkin")
         client.loop_forever()
 
 
@@ -180,6 +250,7 @@ def reset_current_user_values():
     current_user_values["Uhrzeit"] = ""
     current_user_values["Dauer"] = ""
     current_user_values["Statuscode"] = "0"
+
 
 # def read_from_rfid():
 #    reader = SimpleMFRC522()

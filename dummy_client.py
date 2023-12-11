@@ -12,19 +12,44 @@ def on_connect(client, userdata, flags, rc):
 
 
 def on_message(client, userdata, msg):
-    decoded_payload = msg.payload.decode()
-    if isinstance(decoded_payload, str):
-        if msg.topic == "time":
-            message = json.loads(decoded_payload)
-            aktuelle_uhrzeit = message["Uhrzeit"]
-            aktuelles_datum = message["Datum"]
-            print("Aktuelle Uhrzeit: ", aktuelle_uhrzeit, " ; Aktuelles Datum: ", aktuelles_datum)
+    if isinstance(msg, str):
+        print("Received plain text message:", msg)
     else:
         try:
+            decoded_payload = msg.payload.decode()
             message = json.loads(decoded_payload)
+            print("Received JSON message:", message)
+            print(msg.topic)
+
+            if msg.topic == "denkraum/response":
+                reserviert = message["reserviert"]
+                user_id = message["ID"]
+                tisch_nummer = message["Tischnummer"]
+                versionsnummer = message["Versionsnummer"]
+
+                if reserviert == "True":
+                    print("Reservierung wurde gefunden mit folgenden Daten:")
+                    aktuelles_datum = message["Reservierungsdatum"]
+                    aktuelle_uhrzeit = message["Reservierungsuhrzeit"]
+                    dauer = message["Reservierungsdauer"]
+
+                    print(str(user_id), " hat eine Reservierung für Tisch Nummer ", str(tisch_nummer), "Reservierung am: ",
+                          str(aktuelles_datum), " um", str(aktuelle_uhrzeit), " Uhr und wurde für", str(dauer), "gebucht")
+                else:
+                    print("Keine Reservierung gefunden")
+                    print(str(user_id), str(tisch_nummer), str(versionsnummer), "---- Nächste Reservierung ab: ", message["UhrzeitNächsteReservierung"])
+
         except json.decoder.JSONDecodeError as e:
             print(f"Error decoding JSON: {e}")
             print("Invalid JSON format.")
+
+
+def publish_message(client):
+    print("Publishing a message...")
+    message = {"ID": "1", "Tischnummer": "4", "Versionsnummer": "012345"}
+    json_message = json.dumps(message)
+    client.publish("denkraum/checkin", json_message)
+    print(json_message)
 
 
 client = mqtt.Client()
@@ -32,5 +57,8 @@ client.on_connect = on_connect  # Hier die Zuweisung vor dem Verbindungsaufbau
 client.on_message = on_message  # Hier die Zuweisung vor dem Verbindungsaufbau
 client.username_pw_set("user", "Test123")
 client.connect(broker_address, port, 60)
-client.subscribe("time")
+client.subscribe("denkraum/response")
+publish_message(client)
 client.loop_forever()
+
+publish_message(client)
