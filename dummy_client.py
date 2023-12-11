@@ -1,5 +1,6 @@
 import paho.mqtt.client as mqtt
 import json
+from datetime import datetime
 
 broker_address = "localhost"
 port = 1883
@@ -22,22 +23,22 @@ def on_message(client, userdata, msg):
             print(msg.topic)
 
             if msg.topic == "denkraum/response":
-                reserviert = message["reserviert"]
+                is_reserved = message["reserviert"]
                 user_id = message["ID"]
-                tisch_nummer = message["Tischnummer"]
-                versionsnummer = message["Versionsnummer"]
+                table_number = message["Tischnummer"]
+                version_number = message["Versionsnummer"]
 
-                if reserviert == "True":
+                if is_reserved:
                     print("Reservierung wurde gefunden mit folgenden Daten:")
-                    aktuelles_datum = message["Reservierungsdatum"]
-                    aktuelle_uhrzeit = message["Reservierungsuhrzeit"]
-                    dauer = message["Reservierungsdauer"]
+                    reservation_date = message["Reservierungsdatum"]
+                    reservation_time = message["Reservierungsuhrzeit"]
+                    reservation_duration = message["Reservierungsdauer"]
 
-                    print(str(user_id), " hat eine Reservierung für Tisch Nummer ", str(tisch_nummer), "Reservierung am: ",
-                          str(aktuelles_datum), " um", str(aktuelle_uhrzeit), " Uhr und wurde für", str(dauer), "gebucht")
+                    print(str(user_id), "hat eine Reservierung für Tisch Nummer", str(table_number), "Reservierung am:",
+                          str(reservation_date), "um", str(reservation_time), "Uhr und wurde für", str(reservation_duration), "gebucht")
                 else:
                     print("Keine Reservierung gefunden")
-                    print(str(user_id), str(tisch_nummer), str(versionsnummer), "---- Nächste Reservierung ab: ", message["UhrzeitNächsteReservierung"])
+                    print(str(user_id), str(table_number), str(version_number), "---- Nächste Reservierung ab: ", message["Nächste Reservierung"])
 
         except json.decoder.JSONDecodeError as e:
             print(f"Error decoding JSON: {e}")
@@ -46,7 +47,7 @@ def on_message(client, userdata, msg):
 
 def publish_message(client):
     print("Publishing a message...")
-    message = {"ID": "1", "Tischnummer": "4", "Versionsnummer": "012345"}
+    message = {"ID": "0", "Tischnummer": "4", "Versionsnummer": "012345"}
     json_message = json.dumps(message)
     client.publish("denkraum/checkin", json_message)
     print(json_message)

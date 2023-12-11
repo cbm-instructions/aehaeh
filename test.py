@@ -19,97 +19,122 @@ class MQTTThread(threading.Thread):
         self.password = password
         self.interval = 60
 
-    def find_next_reservation_if_exists(self, tischnummer, aktuelles_datum, aktuelle_uhrzeit):
+    def find_next_reservation_if_exists(self, table_number, check_in_date, check_in_time):
         connection = sqlite3.connect("reservations.db")
         cursor = connection.cursor()
 
         try:
+            # Uhrzeit aller Reservierungen an der übergebenen Tischnummer und an dem übergebenen Datum
             cursor.execute(
                 "SELECT Uhrzeit FROM Reservations WHERE Tischnummer=? AND Datum=? ORDER BY Uhrzeit",
-                (tischnummer, str(aktuelles_datum)))
+                (table_number, str(check_in_date)))
             rows = cursor.fetchall()
 
-            # Aktuelle Uhrzeit entspricht keiner Reservierung
+            # An diesem Tag ist keine Reservierung mehr für diesen Tisch geplant worden.
             if not rows:
                 return None
-            aktuelle_uhrzeit_dt = datetime.strptime(aktuelle_uhrzeit, "%H:%M")
-            reservierte_zeiten = [datetime.strptime(row[0], "%H:%M") for row in rows]
+            current_time_rounded = check_in_time
+            times_with_reservations = [datetime.strptime(row[0], "%H:%M") for row in rows]
 
             # Runde die aktuelle Uhrzeit auf das nächste 15-Minuten-Intervall auf
-            minutes_remainder = aktuelle_uhrzeit_dt.minute % 15
+            minutes_remainder = check_in_time.minute % 15
             if minutes_remainder != 0:
-                aktuelle_uhrzeit_dt += timedelta(minutes=15 - minutes_remainder)
+                current_time_rounded += timedelta(minutes=15 - minutes_remainder)
 
             # Durchsuche die Reservierungen und finde die nächste freie Uhrzeit im 15-Minuten-Intervall.
-            next_reservation_time = aktuelle_uhrzeit_dt
-            while next_reservation_time not in reservierte_zeiten:
+            next_reservation_time = current_time_rounded
+            while next_reservation_time not in times_with_reservations:
+                print(next_reservation_time)
                 next_reservation_time += timedelta(minutes=15)
+                if next_reservation_time.strftime("%H:%M") == "00:00":
+                    break
 
-            return next_reservation_time.strftime("%H:%M")
+            return "None"
         finally:
             cursor.close()
             connection.close()
 
-    def does_a_reservation_exist(self, user_id, tischnummer, aktuelles_datum, aktuelle_uhrzeit):
+    def get_reservation_from_reservations(self, user_id, table_number, check_in_date, check_in_time):
         connection = sqlite3.connect("reservations.db")
         cursor = connection.cursor()
 
         try:
             ## Rundet die aktuelle Uhrzeit im 15 Minuten Takt auf
-            aktuelle_uhrzeit_dt = datetime.strptime(aktuelle_uhrzeit, "%H:%M")
-            minuten_rest = aktuelle_uhrzeit_dt.minute % 15
-            if minuten_rest != 0:
-                aktuelle_uhrzeit_dt += timedelta(minutes=(15 - minuten_rest))
-            print("Aktuelle Uhrzeit:", aktuelle_uhrzeit_dt)
+            check_in_time_dt = datetime.strptime(check_in_time, "%H:%M")
+            check_in_time_rounded = check_in_time_dt
+
+            minutes_remainder = check_in_time_rounded.minute % 15
+            if minutes_remainder != 0:
+                check_in_time_rounded += timedelta(minutes=(15 - minutes_remainder))
+            print("Aktuelle Uhrzeit:", check_in_time_dt.strftime("%H:%M"))
 
             cursor.execute(
                 "SELECT ID, Tischnummer, Datum, Uhrzeit, Dauer, Statuscode FROM Reservations WHERE ID=? AND Tischnummer=? AND Datum=?",
-                (user_id, tischnummer, aktuelles_datum))
+                (user_id, table_number, check_in_date))
             rows = cursor.fetchall()
 
+            # Es existiert keine Reservierung. Der Tisch kann verwendet werden bis eine neue Reservierung ansteht.
+            # WICHTIG: next_reservation_time kann auch den Typen None haben
             if not rows:
-                next_reservation_time = self.find_next_reservation_if_exists(tischnummer, aktuelles_datum,
-                                                                             aktuelle_uhrzeit)
-                return False, None, None, next_reservation_time
+                next_reservation_time = self.find_next_reservation_if_exists(table_number, check_in_date,
+                                                                             check_in_time_rounded)
+                return {"reserviert": False, "Nächste Reservierung": next_reservation_time}
 
+            # Es wurden Reservierungen zu dem Nutzer für diesen Tag gefunden. Es wird geprüft, ob
+            # es sich um die Reservierung des Nutzers handelt. Dieser darf maximal 15 Minüten zu spät auftauchen.
             for row in rows:
-                max_zeit = aktuelle_uhrzeit_dt + timedelta(minutes=30)
-                reservierungs_datum = datetime.strptime(row[2], "%d.%m.%Y")
-                reservierungs_uhrzeit = datetime.strptime(row[3], "%H:%M")
-                print("Reservierungs-Uhrzeit:", reservierungs_uhrzeit.strftime("%H:%M"), "Aktuelle-Uhrzeit:",
-                      aktuelle_uhrzeit_dt.strftime("%H:%M"),
-                      "Maximale-Uhrzeit", max_zeit.strftime("%H:%M"))
-                if aktuelle_uhrzeit_dt <= reservierungs_uhrzeit <= max_zeit:
-                    return True, str(reservierungs_datum.strftime("%d.%m.%Y")), str(
-                        reservierungs_uhrzeit.strftime("%H:%M")), None
+                reservation_time = datetime.strptime(row[3], "%H:%M")  # Move this line here
+                max_time = reservation_time + timedelta(minutes=30)
+                reservation_date = datetime.strptime(row[2], "%d.%m.%Y")
+                reservation_duration = row[4]
+                print("Reservierung gefunden.")
+                # Eine Reservierung ist dann gültig, wenn
+                # - Die Reservierung vor oder zur selben Zeit des check-ins stattfindet
+                # - Der Check-in nicht die max_time überschreitet
+                print("Reservierungs-Uhrzeit:", reservation_time.strftime("%H:%M"), "Aktuelle-Uhrzeit:",
+                      check_in_time,
+                      "Maximale-Uhrzeit", max_time.strftime("%H:%M"))
+
+                if reservation_time <= check_in_time_dt <= max_time:
+                    print("Reservierungs-Uhrzeit:", reservation_time.strftime("%H:%M"), "Aktuelle-Uhrzeit:",
+                          check_in_time,
+                          "Maximale-Uhrzeit", max_time.strftime("%H:%M"))
+                    return {"reserviert": True, "Datum": str(reservation_date.strftime("%d.%m.%Y")),
+                            "Uhrzeit": reservation_time.strftime("%H:%M"), "Dauer": str(reservation_duration)}
+
+            print("No criteria found")
+            next_reservation_time = self.find_next_reservation_if_exists(table_number, check_in_date,
+                                                                         check_in_time_rounded)
+            return {"reserviert": False, "Nächste Reservierung": next_reservation_time}
+
         finally:
             cursor.close()
             connection.close()
 
     def send_time_message(self, client):
         while True:
-            aktuelle_zeit = datetime.now()
-            datum = aktuelle_zeit.strftime("%d.%m.%Y")
-            uhrzeit = aktuelle_zeit.strftime("%H:%M")
-            wochentag = aktuelle_zeit.strftime("%A")
+            current_time = datetime.now()
+            date = current_time.strftime("%d.%m.%Y")
+            clock_time = current_time.strftime("%H:%M")
+            weekday = current_time.strftime("%A")
 
-            match wochentag:
+            match weekday:
                 case "Monday":
-                    wochentag = "Montag"
+                    weekday = "Montag"
                 case "Tuesday":
-                    wochentag = "Dienstag"
+                    weekday = "Dienstag"
                 case "Wednesday":
-                    wochentag = "Mittwoch"
+                    weekday = "Mittwoch"
                 case "Thursday":
-                    wochentag = "Donnerstag"
+                    weekday = "Donnerstag"
                 case "Friday":
-                    wochentag = "Freitag"
+                    weekday = "Freitag"
                 case "Saturday":
-                    wochentag = "Samstag"
+                    weekday = "Samstag"
                 case "Sunday":
-                    wochentag = "Sonntag"
+                    weekday = "Sonntag"
 
-            message = {"Uhrzeit": uhrzeit, "Datum": datum, "Wochentag": wochentag}
+            message = {"Uhrzeit": clock_time, "Datum": date, "Wochentag": weekday}
             client.publish("time", json.dumps(message))
             print("Time sent")
             time.sleep(self.interval)
@@ -165,24 +190,33 @@ class MQTTThread(threading.Thread):
 
                 if msg.topic == "denkraum/checkin":
                     user_id = message["ID"]
-                    versions_nummer = message["Versionsnummer"]
-                    tisch_nummer = message["Tischnummer"]
-                    aktuelle_zeit = datetime.now()
-                    aktuelles_datum = aktuelle_zeit.strftime("%d.%m.%Y")
-                    aktuelle_uhrzeit = aktuelle_zeit.strftime("%H:%M")
-                    reserviert, datum, uhrzeit, next_free_time = self.does_a_reservation_exist(user_id, tisch_nummer,
-                                                                                               aktuelles_datum,
-                                                                                               aktuelle_uhrzeit)
+                    version_number = message["Versionsnummer"]
+                    table_number = message["Tischnummer"]
+                    current_datetime = datetime.now()
+                    check_in_date = current_datetime.strftime("%d.%m.%Y")
+                    check_in_time = current_datetime.strftime("%H:%M")
 
-                    response = ""
+                    reservation = self.get_reservation_from_reservations(user_id, table_number, check_in_date,
+                                                                         check_in_time)
 
-                    if reserviert:
-                        response = {"ID": user_id, "Tischnummer": tisch_nummer, "Versionsnummer": versions_nummer,
-                                    "Reservierungsdatum": datum, "Reservierungsuhrzeit": uhrzeit,
-                                    "Reservierungsdauer": "", "reserviert": "True"}
+                    is_reserved = reservation["reserviert"]
+
+                    if is_reserved:
+                        reservation_date = reservation["Datum"]
+                        reservation_time = reservation["Uhrzeit"]
+                        reservation_duration = reservation["Dauer"]
+
+                        response = {"ID": user_id, "Tischnummer": table_number, "Versionsnummer": version_number,
+                                    "Reservierungsdatum": reservation_date, "Reservierungsuhrzeit": reservation_time,
+                                    "Reservierungsdauer": reservation_duration, "reserviert": is_reserved}
+
                     else:
-                        response = {"ID": user_id, "Tischnummer": tisch_nummer, "Versionsnummer": versions_nummer,
-                                    "UhrzeitNächsteReservierung": str(next_free_time), "reserviert": "False"}
+                        next_reservation_time = reservation["Nächste Reservierung"]
+                        if next_reservation_time is None:
+                            next_reservation_time = "None"
+
+                        response = {"ID": user_id, "Tischnummer": table_number, "Versionsnummer": version_number,
+                                    "Nächste Reservierung": next_reservation_time, "reserviert": is_reserved}
 
                     client.publish("denkraum/response", json.dumps(response))
                     print("Response sent. Result of Reservation", response)
