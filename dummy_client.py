@@ -34,11 +34,15 @@ def on_message(client, userdata, msg):
                     reservation_time = message["Reservierungsuhrzeit"]
                     reservation_duration = message["Reservierungsdauer"]
 
-                    print(str(user_id), "hat eine Reservierung für Tisch Nummer", str(table_number), "Reservierung am:",
-                          str(reservation_date), "um", str(reservation_time), "Uhr und wurde für", str(reservation_duration), "gebucht")
+                    print("Willkommen", str(user_id), "Du hast eine Reservierung für Tisch Nummer", str(table_number),
+                          "betätigt. Die Reservierung ist für den",
+                          str(reservation_date), "um", str(reservation_time), "Uhr registriert worden und wurde für",
+                          str(reservation_duration), "Minuten gebucht!")
                 else:
                     print("Keine Reservierung gefunden")
-                    print(str(user_id), str(table_number), str(version_number), "---- Nächste Reservierung ab: ", message["Nächste Reservierung"])
+                    print("User ID: ", str(user_id), "---", "Tisch Nummer:", str(table_number), "---",
+                          "Versions Nummer:", str(version_number), "---", "Nächste Reservierung für diesen Tisch:",
+                          message["Nächste Reservierung"])
 
         except json.decoder.JSONDecodeError as e:
             print(f"Error decoding JSON: {e}")
@@ -47,7 +51,7 @@ def on_message(client, userdata, msg):
 
 def publish_message(client):
     print("Publishing a message...")
-    message = {"ID": "0", "Tischnummer": "4", "Versionsnummer": "012345"}
+    message = {"ID": "0", "Tischnummer": "5", "Versionsnummer": "012345"}
     json_message = json.dumps(message)
     client.publish("denkraum/checkin", json_message)
     print(json_message)
