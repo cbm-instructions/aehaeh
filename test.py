@@ -168,7 +168,7 @@ class MQTTThread(threading.Thread):
                         reservations.append(reservation)
                     json_reservations = json.dumps(reservations)
                     client.publish(topics[i], json_reservations)
-                time.sleep(60)
+                time.sleep(5)
             finally:
                 cursor.close()
                 connection.close()
