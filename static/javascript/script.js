@@ -129,6 +129,7 @@ function moveBackward() {
     //const lastElement = document.querySelector('.circle-container li:last-child');
     //firstElement.style.transform = `rotate(${parseInt(firstElement.style.transform.split('(')[1]) + 45}deg) translate(10em) rotate(-${parseInt(firstElement.style.transform.split('(')[1]) + 45}deg)`;
     document.querySelector('.circle-container').appendChild(firstElement);
+
 }
 
 function moveForward() {
@@ -136,17 +137,19 @@ function moveForward() {
     const lastElement = document.querySelector('.circle-container li:last-child');
     //lastElement.style.transform = `rotate(${parseInt(lastElement.style.transform.split('(')[1]) - 45}deg) translate(10em) rotate(-${parseInt(lastElement.style.transform.split('(')[1]) - 45}deg)`;
     document.querySelector('.circle-container').prepend(lastElement);
+
 }
 
 
 function moveSecondCircleForward() {
-    const firstElement = document.querySelector('#circle-container2 li');
-    document.querySelector('#circle-container').appendChild(firstElement);
+    const lastElement = document.querySelector('#circle-container2 li:last-child');
+    document.querySelector('#circle-container2').prepend(lastElement);
 }
 
 function moveSecondCircleBackward() {
-    const lastElement = document.querySelector('#circle-container2 li:last-child');
-    document.querySelector('#circle-container2').prepend(lastElement);
+    const firstElement = document.querySelector('#circle-container2 li');
+    document.querySelector('#circle-container').appendChild(firstElement);
+
 }
 
 var socket = io.connect('http://' + document.domain + ':' + location.port);
