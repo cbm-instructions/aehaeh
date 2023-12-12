@@ -44,12 +44,12 @@ class MQTTThread(threading.Thread):
             # Durchsuche die Reservierungen und finde die nächste freie Uhrzeit im 15-Minuten-Intervall.
             next_reservation_time = current_time_rounded
             while next_reservation_time not in times_with_reservations:
-                print(next_reservation_time)
                 next_reservation_time += timedelta(minutes=15)
+                print(next_reservation_time)
                 if next_reservation_time.strftime("%H:%M") == "00:00":
                     break
 
-            return "None"
+            return next_reservation_time.strftime("%H:%M")
         finally:
             cursor.close()
             connection.close()
