@@ -390,6 +390,8 @@ def update_value():
     socketio.emit('new_value', {'value': 'false'})
 
 
+reservation_time = ""
+
 @socketio.on('update_current_user_values')
 def update_current_user_values(data):
     key = data['key']

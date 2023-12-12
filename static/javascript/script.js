@@ -1,3 +1,5 @@
+let isSecondCircle = false;
+
 fetch('../static/JSON/data.json')
     .then(response => response.json())
     .then(data => {
@@ -5,42 +7,72 @@ fetch('../static/JSON/data.json')
         let ulElement2 = document.getElementById("circle-container2");
         let labelElement = document.getElementById("label");
         let dataTypeIndex = 0;
+        let hour = "";
+        let minutes = "";
+
 
         function updateDataDisplay() {
-            let selectedData = data[dataTypeIndex];
-            labelElement.innerText = selectedData["name"]
-            let firstValues = selectedData.firstValues;
-            let secondValues = selectedData.secondValues;
-            ulElement.innerHTML = '';
+            setBackground();
+            if (!isSecondCircle) {
+                let selectedData = data[dataTypeIndex];
+                labelElement.innerText = selectedData["name"]
+                updateButtonDisplay();
+                setBackground();
+                let firstValues = selectedData.firstValues;
+                let secondValues = selectedData.secondValues;
+                ulElement.innerHTML = '';
 
-            for (let i = 0; i < firstValues.length; i++) {
-                let liElement = document.createElement('li');
-                liElement.appendChild(document.createTextNode(firstValues[i]))
-                ulElement.appendChild(liElement)
-            }
-
-            if (secondValues.length != 0) {
-                ulElement2.style.display = "block";
-                for (let i = 0; i < secondValues.length; i++) {
+                for (let i = 0; i < firstValues.length; i++) {
                     let liElement = document.createElement('li');
-                    liElement.appendChild(document.createTextNode(secondValues[i]))
-                    ulElement2.appendChild(liElement)
+                    liElement.appendChild(document.createTextNode(firstValues[i]))
+                    ulElement.appendChild(liElement)
                 }
-            }else{
-                ulElement2.style.display = "none";
+
+                if (secondValues.length != 0) {
+                    ulElement2.style.display = "block";
+                    for (let i = 0; i < secondValues.length; i++) {
+                        let liElement = document.createElement('li');
+                        liElement.appendChild(document.createTextNode(secondValues[i]))
+                        ulElement2.appendChild(liElement)
+                    }
+                } else {
+                    ulElement2.style.display = "none";
+                }
             }
-            updateButtonDisplay();
         }
 
         function updateButtonDisplay() {
             const buttonLeft = document.getElementById("button-left");
+            buttonLeft.style.display = (labelElement.innerText != "Tisch Nr.") ? "block" : "none";
+        }
 
-            buttonLeft.style.display = (data[dataTypeIndex].name === "Tisch Nr.") ? "none" : "block";
+
+        function setBackground() {
+            if (labelElement.innerText != "Uhrzeit"){
+                ulElement.style.backgroundColor = 'rgba(236,167,118,255)';
+                ulElement2.style.display = "none";
+            }
+            else if (labelElement.innerText == "Uhrzeit" && !isSecondCircle) {
+                ulElement2.style.display = "block";
+                ulElement.style.backgroundColor = 'rgba(236,167,118,255)';
+                ulElement2.style.backgroundColor = 'rgb(217,217,217)';
+            } else if(labelElement.innerText == "Uhrzeit" && isSecondCircle) {
+                ulElement2.style.display = "block";
+                ulElement.style.backgroundColor = 'rgb(217,217,217)';
+                ulElement2.style.backgroundColor = 'rgba(236,167,118,255)';
+            }
         }
 
         updateDataDisplay(); // Initialanzeige
         document.getElementById("button-left").addEventListener("click", function () {
-            dataTypeIndex = (dataTypeIndex - 1 + data.length) % data.length;
+            if (labelElement.innerText == "Uhrzeit" && !isSecondCircle) {
+                dataTypeIndex = (dataTypeIndex - 1 + data.length) % data.length;
+                isSecondCircle = !isSecondCircle;
+            } else if (labelElement.innerText == "Uhrzeit" && isSecondCircle) {
+                isSecondCircle = !isSecondCircle;
+            } else {
+                dataTypeIndex = (dataTypeIndex - 1 + data.length) % data.length;
+            }
             updateDataDisplay();
         });
 
@@ -48,22 +80,49 @@ fetch('../static/JSON/data.json')
             let label = data[dataTypeIndex].name;
             let selectedValue = "";
 
-            if (label == "Uhrzeit"){
+            if (label == "Uhrzeit" && !isSecondCircle) {
                 const fourthLiElementInFirstCircle = document.querySelector('.circle-container li:nth-child(4)');
+                hour = fourthLiElementInFirstCircle.innerText
+            } else if (label == "Uhrzeit" && isSecondCircle) {
                 const fourthLiElementInSecondCircle = document.querySelector('#circle-container2 li:nth-child(4)');
-                selectedValue = fourthLiElementInFirstCircle.innerText + ":" + fourthLiElementInSecondCircle.innerText;
-
-            }
-            else{
+                minutes = fourthLiElementInSecondCircle.innerText;
+                selectedValue = hour + ":" + minutes;
+                dataTypeIndex = (dataTypeIndex + 1) % data.length;
+            } else {
                 const fourthLiElement = document.querySelector('.circle-container li:nth-child(4)');
                 selectedValue = fourthLiElement.innerText;
+                dataTypeIndex = (dataTypeIndex + 1) % data.length;
             }
-            socket.emit('update_current_user_values', {key: label, value: selectedValue});
-            dataTypeIndex = (dataTypeIndex + 1) % data.length;
+            if (label != "Uhrzeit" || isSecondCircle){
+                socket.emit('update_current_user_values', {key: label, value: selectedValue});
+            }
+
+            if (label == "Uhrzeit") {
+                isSecondCircle = !isSecondCircle;
+            }
+
             updateDataDisplay();
         });
     })
 
+
+function handleButtonClick(direction) {
+    let labelElement = document.getElementById("label");
+
+    if (direction === 'forward') {
+        if (isSecondCircle && labelElement.innerText == "Uhrzeit") {
+            moveSecondCircleForward()
+        } else {
+            moveForward()
+        }
+    } else {
+        if (isSecondCircle && labelElement.innerText == "Uhrzeit") {
+            moveSecondCircleBackward()
+        } else {
+            moveBackward()
+        }
+    }
+}
 
 function moveBackward() {
     const firstElement = document.querySelector('.circle-container li');
@@ -77,6 +136,17 @@ function moveForward() {
     const lastElement = document.querySelector('.circle-container li:last-child');
     //lastElement.style.transform = `rotate(${parseInt(lastElement.style.transform.split('(')[1]) - 45}deg) translate(10em) rotate(-${parseInt(lastElement.style.transform.split('(')[1]) - 45}deg)`;
     document.querySelector('.circle-container').prepend(lastElement);
+}
+
+
+function moveSecondCircleForward() {
+    const firstElement = document.querySelector('#circle-container2 li');
+    document.querySelector('#circle-container').appendChild(firstElement);
+}
+
+function moveSecondCircleBackward() {
+    const lastElement = document.querySelector('#circle-container2 li:last-child');
+    document.querySelector('#circle-container2').prepend(lastElement);
 }
 
 var socket = io.connect('http://' + document.domain + ':' + location.port);
@@ -97,11 +167,11 @@ socket.on('new_value', function (data) {
 
     // Wenn das Ereignis 'right' empfangen wird
     if (data.right) {
-        moveForward();
+        handleButtonClick('forward');
     }
 
     // Wenn das Ereignis 'left' empfangen wird
     if (data.left) {
-        moveBackward();
+        handleButtonClick('backward');
     }
 });
