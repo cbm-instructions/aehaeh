@@ -36,15 +36,15 @@ class MQTTThread(threading.Thread):
             current_time_rounded = check_in_time
             times_with_reservations = [datetime.strptime(row[0], "%H:%M") for row in rows]
 
-            # Runde die aktuelle Uhrzeit auf das nächste 15-Minuten-Intervall auf
-            minutes_remainder = check_in_time.minute % 15
+            # Runde die aktuelle Uhrzeit auf das nächste 5-Minuten-Intervall auf
+            minutes_remainder = check_in_time.minute % 5
             if minutes_remainder != 0:
-                current_time_rounded += timedelta(minutes=15 - minutes_remainder)
+                current_time_rounded += timedelta(minutes=5 - minutes_remainder)
 
-            # Durchsuche die Reservierungen und finde die nächste freie Uhrzeit im 15-Minuten-Intervall.
+            # Durchsuche die Reservierungen und finde die nächste freie Uhrzeit im 5-Minuten-Intervall.
             next_reservation_time = current_time_rounded
             while next_reservation_time not in times_with_reservations:
-                next_reservation_time += timedelta(minutes=15)
+                next_reservation_time += timedelta(minutes=5)
                 print(next_reservation_time)
                 if next_reservation_time.strftime("%H:%M") == "00:00":
                     break
@@ -59,13 +59,13 @@ class MQTTThread(threading.Thread):
         cursor = connection.cursor()
 
         try:
-            ## Rundet die aktuelle Uhrzeit im 15 Minuten Takt auf
+            ## Rundet die aktuelle Uhrzeit im 5 Minuten Takt auf
             check_in_time_dt = datetime.strptime(check_in_time, "%H:%M")
             check_in_time_rounded = check_in_time_dt
 
-            minutes_remainder = check_in_time_rounded.minute % 15
+            minutes_remainder = check_in_time_rounded.minute % 5
             if minutes_remainder != 0:
-                check_in_time_rounded += timedelta(minutes=(15 - minutes_remainder))
+                check_in_time_rounded += timedelta(minutes=(5 - minutes_remainder))
             print("Aktuelle Uhrzeit:", check_in_time_dt.strftime("%H:%M"))
 
             cursor.execute(
@@ -81,10 +81,10 @@ class MQTTThread(threading.Thread):
                 return {"reserviert": False, "Nächste Reservierung": next_reservation_time}
 
             # Es wurden Reservierungen zu dem Nutzer für diesen Tag gefunden. Es wird geprüft, ob
-            # es sich um die Reservierung des Nutzers handelt. Dieser darf maximal 15 Minüten zu spät auftauchen.
+            # es sich um die Reservierung des Nutzers handelt. Dieser darf maximal 20 Minüten zu spät auftauchen.
             for row in rows:
                 reservation_time = datetime.strptime(row[3], "%H:%M")  # Move this line here
-                max_time = reservation_time + timedelta(minutes=30)
+                max_time = reservation_time + timedelta(minutes=20)
                 reservation_date = datetime.strptime(row[2], "%d.%m.%Y")
                 reservation_duration = row[4]
                 print("Reservierung gefunden.")

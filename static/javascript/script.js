@@ -13,31 +13,24 @@ fetch('../static/JSON/data.json')
 
         function updateDataDisplay() {
             setBackground();
-            if (!isSecondCircle) {
-                let selectedData = data[dataTypeIndex];
-                labelElement.innerText = selectedData["name"]
-                updateButtonDisplay();
-                setBackground();
-                let firstValues = selectedData.firstValues;
-                let secondValues = selectedData.secondValues;
-                ulElement.innerHTML = '';
+            let selectedData = data[dataTypeIndex];
+            labelElement.innerText = selectedData["name"]
+            updateButtonDisplay();
+            setBackground();
+            let firstValues = selectedData.firstValues;
+            let secondValues = selectedData.secondValues;
+            ulElement.innerHTML = '';
 
-                for (let i = 0; i < firstValues.length; i++) {
-                    let liElement = document.createElement('li');
-                    liElement.appendChild(document.createTextNode(firstValues[i]))
-                    ulElement.appendChild(liElement)
-                }
+            for (let i = 0; i < firstValues.length; i++) {
+                let liElement = document.createElement('li');
+                liElement.appendChild(document.createTextNode(firstValues[i]))
+                ulElement.appendChild(liElement)
+            }
 
-                if (secondValues.length != 0) {
-                    ulElement2.style.display = "block";
-                    for (let i = 0; i < secondValues.length; i++) {
-                        let liElement = document.createElement('li');
-                        liElement.appendChild(document.createTextNode(secondValues[i]))
-                        ulElement2.appendChild(liElement)
-                    }
-                } else {
-                    ulElement2.style.display = "none";
-                }
+            for (let i = 0; i < secondValues.length; i++) {
+                let liElement = document.createElement('li');
+                liElement.appendChild(document.createTextNode(secondValues[i]))
+                ulElement2.appendChild(liElement)
             }
         }
 
@@ -48,15 +41,14 @@ fetch('../static/JSON/data.json')
 
 
         function setBackground() {
-            if (labelElement.innerText != "Uhrzeit"){
+            if (labelElement.innerText != "Uhrzeit") {
                 ulElement.style.backgroundColor = 'rgba(236,167,118,255)';
                 ulElement2.style.display = "none";
-            }
-            else if (labelElement.innerText == "Uhrzeit" && !isSecondCircle) {
+            } else if (labelElement.innerText == "Uhrzeit" && !isSecondCircle) {
                 ulElement2.style.display = "block";
                 ulElement.style.backgroundColor = 'rgba(236,167,118,255)';
                 ulElement2.style.backgroundColor = 'rgb(217,217,217)';
-            } else if(labelElement.innerText == "Uhrzeit" && isSecondCircle) {
+            } else if (labelElement.innerText == "Uhrzeit" && isSecondCircle) {
                 ulElement2.style.display = "block";
                 ulElement.style.backgroundColor = 'rgb(217,217,217)';
                 ulElement2.style.backgroundColor = 'rgba(236,167,118,255)';
@@ -65,11 +57,15 @@ fetch('../static/JSON/data.json')
 
         updateDataDisplay(); // Initialanzeige
         document.getElementById("button-left").addEventListener("click", function () {
-            if (labelElement.innerText == "Uhrzeit" && !isSecondCircle) {
+            // Zurück - Button wird geklickt, wenn der Nutzer die Stunden bei der Uhrzeit eingibt
+            if (labelElement.innerText == "Dauer") {
                 dataTypeIndex = (dataTypeIndex - 1 + data.length) % data.length;
-                isSecondCircle = !isSecondCircle;
+                isSecondCircle = true;
+                //alert(data[dataTypeIndex].name);
+                // Zurück- Button wird geklickt, wenn der Nutzer die Minuten bei der Uhrzeit eingibt
             } else if (labelElement.innerText == "Uhrzeit" && isSecondCircle) {
-                isSecondCircle = !isSecondCircle;
+                isSecondCircle = false;
+                // Zurück- Button wird geklickt, wenn der Nutzer sich nicht bei der Uhrzeit befindet
             } else {
                 dataTypeIndex = (dataTypeIndex - 1 + data.length) % data.length;
             }
@@ -80,20 +76,23 @@ fetch('../static/JSON/data.json')
             let label = data[dataTypeIndex].name;
             let selectedValue = "";
 
+            // Eingabe der Stunden bei der Uhrzeit
             if (label == "Uhrzeit" && !isSecondCircle) {
                 const fourthLiElementInFirstCircle = document.querySelector('.circle-container li:nth-child(4)');
                 hour = fourthLiElementInFirstCircle.innerText
+                // Eingabe der Minuten bei der Uhrzeit
             } else if (label == "Uhrzeit" && isSecondCircle) {
                 const fourthLiElementInSecondCircle = document.querySelector('#circle-container2 li:nth-child(4)');
                 minutes = fourthLiElementInSecondCircle.innerText;
                 selectedValue = hour + ":" + minutes;
                 dataTypeIndex = (dataTypeIndex + 1) % data.length;
+                // Jede andere Eingabe
             } else {
                 const fourthLiElement = document.querySelector('.circle-container li:nth-child(4)');
                 selectedValue = fourthLiElement.innerText;
                 dataTypeIndex = (dataTypeIndex + 1) % data.length;
             }
-            if (label != "Uhrzeit" || isSecondCircle){
+            if (label != "Uhrzeit" || (label == "Uhrzeit" && isSecondCircle)) {
                 socket.emit('update_current_user_values', {key: label, value: selectedValue});
             }
 
@@ -125,6 +124,15 @@ function handleButtonClick(direction) {
 }
 
 function moveBackward() {
+    //const firstElement = document.querySelector('.circle-container li');
+    const lastElement = document.querySelector('.circle-container li:last-child');
+    //lastElement.style.transform = `rotate(${parseInt(lastElement.style.transform.split('(')[1]) - 45}deg) translate(10em) rotate(-${parseInt(lastElement.style.transform.split('(')[1]) - 45}deg)`;
+    document.querySelector('.circle-container').prepend(lastElement);
+
+
+}
+
+function moveForward() {
     const firstElement = document.querySelector('.circle-container li');
     //const lastElement = document.querySelector('.circle-container li:last-child');
     //firstElement.style.transform = `rotate(${parseInt(firstElement.style.transform.split('(')[1]) + 45}deg) translate(10em) rotate(-${parseInt(firstElement.style.transform.split('(')[1]) + 45}deg)`;
@@ -132,23 +140,16 @@ function moveBackward() {
 
 }
 
-function moveForward() {
-    //const firstElement = document.querySelector('.circle-container li');
-    const lastElement = document.querySelector('.circle-container li:last-child');
-    //lastElement.style.transform = `rotate(${parseInt(lastElement.style.transform.split('(')[1]) - 45}deg) translate(10em) rotate(-${parseInt(lastElement.style.transform.split('(')[1]) - 45}deg)`;
-    document.querySelector('.circle-container').prepend(lastElement);
-
-}
-
 
 function moveSecondCircleForward() {
-    const lastElement = document.querySelector('#circle-container2 li:last-child');
-    document.querySelector('#circle-container2').prepend(lastElement);
+    const firstElement = document.querySelector('#circle-container2 li');
+    document.querySelector('#circle-container').appendChild(firstElement);
+
 }
 
 function moveSecondCircleBackward() {
-    const firstElement = document.querySelector('#circle-container2 li');
-    document.querySelector('#circle-container').appendChild(firstElement);
+    const lastElement = document.querySelector('#circle-container2 li:last-child');
+    document.querySelector('#circle-container2').prepend(lastElement);
 
 }
 
