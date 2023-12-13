@@ -49,7 +49,7 @@ class MQTTThread(threading.Thread):
                 if next_reservation_time.strftime("%H:%M") == "00:00":
                     break
 
-            return next_reservation_time.strftime("%H:%M")
+            return "None" if next_reservation_time.strftime("%H:%M") == "00:00" else next_reservation_time.strftime("%H:%M")
         finally:
             cursor.close()
             connection.close()
@@ -173,6 +173,20 @@ class MQTTThread(threading.Thread):
                 cursor.close()
                 connection.close()
 
+    def check_out_from_reservation(self, user_id, table_number, reservation_date, reservation_clock_time):
+        connection = sqlite3.connect("reservations.db")
+        cursor = connection.cursor()
+
+        try:
+            cursor.execute(
+                "UPDATE Reservations SET Statuscode = '1' WHERE ID=? AND Tischnummer=? AND Datum=? AND Uhrzeit=?",
+                (user_id, table_number, reservation_date, reservation_clock_time)
+            )
+            connection.commit()
+        finally:
+            cursor.close()
+            connection.close()
+
     def on_connect(self, client, userdata, flags, rc):
         create_table_reservations()
         print("Verbunden mit dem MQTT Broker mit dem Result Code: " + str(rc))
@@ -188,7 +202,17 @@ class MQTTThread(threading.Thread):
                 message = json.loads(decoded_payload)
                 print("Received JSON message:", message)
 
-                if msg.topic == "denkraum/checkin":
+                if msg.topic =="Denkraum/checkout":
+                    user_id = message["ID"]
+                    table_number = message["Tischnummer"]
+                    reservation_date = message["Reservierungsdatum"]
+                    reservation_clock_time = message["Reservierungsuhrzeit"]
+
+                    self.check_out_from_reservation(user_id, table_number, reservation_date, reservation_clock_time)
+
+                    print("Reservation was marked as completed!")
+
+                elif msg.topic == "denkraum/checkin":
                     user_id = message["ID"]
                     version_number = message["Versionsnummer"]
                     table_number = message["Tischnummer"]
@@ -235,6 +259,7 @@ class MQTTThread(threading.Thread):
         client.on_message = self.on_message
         client.on_connect = self.on_connect
         client.subscribe("denkraum/checkin")
+        client.subscribe("Denkraum/checkout")
         client.loop_forever()
 
 
@@ -309,7 +334,7 @@ def create_table_reservations():
                            Datum TEXT,
                            Uhrzeit TEXT,
                            Dauer TEXT,
-                           Statuscode TEXT DEFAULT 0,
+                           Statuscode TEXT DEFAULT "0",
                            UNIQUE(ID, Tischnummer, Datum, Uhrzeit)
                        )''')
     finally:
