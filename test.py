@@ -128,7 +128,7 @@ class MQTTThread(threading.Thread):
             current_time = datetime.now()
             date = current_time.strftime("%d.%m.%Y")
             clock_time = current_time.strftime("%H:%M")
-            weekday = weekday_translations(current_time.strftime("%A"))
+            weekday = weekday_translations[current_time.strftime("%A")]
             message = {"Uhrzeit": clock_time, "Datum": date, "Wochentag": weekday}
             client.publish("time", json.dumps(message))
             print("Time sent")
