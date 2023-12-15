@@ -80,88 +80,69 @@ fetch('../static/JSON/data.json')
         }
 
         document.getElementById("button-turn-backward").addEventListener("click", function () {
-            //handleButtonClick('backward');
-            socket.emit('button', 'back');
+            socket.emit('button', 'backward');
         });
 
         document.getElementById("button-turn-forward").addEventListener("click", function () {
-            //handleButtonClick('forward');
             socket.emit('button', 'forward');
         });
 
         document.getElementById("button-left").addEventListener("click", function () {
-            handleButtonClick('back');
-            updateDataDisplay();
+            socket.emit('button', 'back');
         });
 
         document.getElementById("button-right").addEventListener("click", function () {
-            handleButtonClick('ok');
-            updateDataDisplay();
+            socket.emit('button', 'ok');
         });
 
         function moveBackward() {
             let lastElement = document.querySelector('#circle-container li:last-child');
-            console.log(lastElement.innerText)
             let container = document.querySelector('.circle-container');
             container.prepend(lastElement);
-            lastElement = container.querySelector('li:last-child');
-            console.log(lastElement.innerText)
         }
 
         function moveForward() {
             let firstElement = document.querySelector('#circle-container li');
-            console.log(firstElement.innerText)
             let container = document.querySelector('.circle-container');
             container.appendChild(firstElement);
-            firstElement = container.querySelector('li');
-            console.log(firstElement.innerText)
         }
 
         function moveSecondCircleForward() {
             let firstElement = document.querySelector('#circle-container2 li');
-            console.log(firstElement.innerText)
             let container = document.querySelector('#circle-container');
             container.appendChild(firstElement);
-            firstElement = container.querySelector('#circle-container2 li');
-            console.log(firstElement.innerText)
         }
 
         function moveSecondCircleBackward() {
             let lastElement = document.querySelector('#circle-container2 li:last-child');
-            console.log(lastElement.innerText)
             let container = document.querySelector('#circle-container2');
             container.prepend(lastElement);
-            lastElement = container.querySelector('li:last-child');
-            console.log(lastElement.innerText)
         }
 
         socket.on('new_value', function (data) {
             if (data.ok) {
                 handleButtonClick('ok')
-                updateDataDisplay();
             }
 
             // Wenn das Ereignis 'back' empfangen wird
             if (data.back) {
                 handleButtonClick('back')
-                updateDataDisplay();
             }
 
             // Wenn das Ereignis 'right' empfangen wird
-            if (data.right) {
+            if (data.forward) {
+                console.log("right")
                 handleButtonClick('forward');
-                updateDataDisplay();
             }
 
             // Wenn das Ereignis 'left' empfangen wird
-            if (data.left) {
+            if (data.backward) {
+                console.log("left")
                 handleButtonClick('backward');
-                updateDataDisplay();
             }
         });
 
         function updateDataDisplay() {
-
             let selectedData = data[dataTypeIndex];
             labelElement.innerText = selectedData["name"]
             updateButtonDisplay();
@@ -210,7 +191,6 @@ fetch('../static/JSON/data.json')
                 ulElement2.style.backgroundColor = 'rgba(236,167,118,255)';
             }
         }
-
         setBackground();
         updateDataDisplay(); // Initialanzeige
     })

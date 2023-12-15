@@ -11,6 +11,16 @@ import time
 import os
 
 
+weekday_translations = {
+    "Monday": "Montag",
+    "Tuesday": "Dienstag",
+    "Wednesday": "Mittwoch",
+    "Thursday": "Donnerstag",
+    "Friday": "Freitag",
+    "Saturday": "Samstag",
+    "Sunday": "Sonntag"
+}
+
 class MQTTThread(threading.Thread):
     def __init__(self, broker_address, port, username, password):
         super(MQTTThread, self).__init__()
@@ -422,45 +432,48 @@ def update_current_user_values(data):
 @socketio.on('button')
 def update_current_user_values(data):
     print("update button")
-    if data == "back":
-        socketio.emit('new_value', {'right': 'true'})
-    else:
-        socketio.emit('new_value', {'left': 'true'})
-
-def clkClicked(channel):
-    global counter
-    global step
-
-    clkState = GPIO.input(clk)
-    dtState = GPIO.input(dt)
-
-    if clkState == 0 and dtState == 1:
-        counter = counter + step
-        socketio.emit('new_value', {'left': 'true'})
-        print("Counter ", counter)
-
-
-def dtClicked(channel):
-    global counter
-    global step
-
-    clkState = GPIO.input(clk)
-    dtState = GPIO.input(dt)
-
-    if clkState == 1 and dtState == 0:
-        counter = counter - step
-        socketio.emit('new_value', {'right': 'true'})
-        print("Counter ", counter)
+    if data == "forward":
+        socketio.emit('new_value', {'forward': 'true'})
+    elif data == "backward":
+        socketio.emit('new_value', {'backward': 'true'})
+    elif data == "back":
+        socketio.emit('new_value', {'back': 'true'})
+    elif data == "ok":
+        socketio.emit('new_value', {'ok': 'true'})
+#def clkClicked(channel):
+#    global counter
+#    global step
+#
+#    clkState = GPIO.input(clk)
+#    dtState = GPIO.input(dt)
+#
+#    if clkState == 0 and dtState == 1:
+#        counter = counter + step
+#        socketio.emit('new_value', {'left': 'true'})
+#        print("Counter ", counter)
 
 
-def backClicked(channel):
-    socketio.emit('new_value', {'back': 'true'})
-    print("Back clicked")
+#def dtClicked(channel):
+#    global counter
+#    global step
+#
+#    clkState = GPIO.input(clk)
+#    dtState = GPIO.input(dt)
+#
+#    if clkState == 1 and dtState == 0:
+#        counter = counter - step
+#        socketio.emit('new_value', {'right': 'true'})
+#        print("Counter ", counter)
 
 
-def okClicked(channel):
-    socketio.emit('new_value', {'ok': 'true'})
-    print("Ok clicked")
+#def backClicked(channel):
+#    socketio.emit('new_value', {'back': 'true'})
+#    print("Back clicked")
+#
+#
+#def okClicked(channel):
+#    socketio.emit('new_value', {'ok': 'true'})
+#    print("Ok clicked")
 
 
 #GPIO.add_event_detect(clk, GPIO.FALLING, callback=clkClicked, bouncetime=300)
@@ -485,14 +498,6 @@ if __name__ == '__main__':
     app.run(debug=False, host='0.0.0.0')
     mqtt_thread.join()
 
-GPIO.cleanup()
+# GPIO.cleanup()
 
-weekday_translations = {
-    "Monday": "Montag",
-    "Tuesday": "Dienstag",
-    "Wednesday": "Mittwoch",
-    "Thursday": "Donnerstag",
-    "Friday": "Freitag",
-    "Saturday": "Samstag",
-    "Sunday": "Sonntag"
-}
+
