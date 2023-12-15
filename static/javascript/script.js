@@ -100,30 +100,36 @@ fetch('../static/JSON/data.json')
         function moveBackward() {
             let lastElement = document.querySelector('#circle-container li:last-child');
             console.log(lastElement.innerText)
-            document.querySelector('.circle-container').prepend(lastElement);
+            let container = document.querySelector('.circle-container');
+            container.prepend(lastElement);
+            lastElement = container.querySelector('li:last-child');
+            console.log(lastElement.innerText)
         }
 
         function moveForward() {
             let firstElement = document.querySelector('#circle-container li');
             console.log(firstElement.innerText)
-            document.querySelector('.circle-container').appendChild(firstElement);
-            firstElement = document.querySelector('#circle-container li');
+            let container = document.querySelector('.circle-container');
+            container.appendChild(firstElement);
+            firstElement = container.querySelector('li');
             console.log(firstElement.innerText)
         }
 
         function moveSecondCircleForward() {
             let firstElement = document.querySelector('#circle-container2 li');
             console.log(firstElement.innerText)
-            document.querySelector('#circle-container').appendChild(firstElement);
-                        firstElement = document.querySelector('#circle-container2 li');
+            let container = document.querySelector('#circle-container');
+            container.appendChild(firstElement);
+            firstElement = container.querySelector('#circle-container2 li');
             console.log(firstElement.innerText)
         }
 
         function moveSecondCircleBackward() {
             let lastElement = document.querySelector('#circle-container2 li:last-child');
             console.log(lastElement.innerText)
-            document.querySelector('#circle-container2').prepend(lastElement);
-            lastElement = document.querySelector('#circle-container2 li:last-child');
+            let container = document.querySelector('#circle-container2');
+            container.prepend(lastElement);
+            lastElement = container.querySelector('li:last-child');
             console.log(lastElement.innerText)
         }
 
