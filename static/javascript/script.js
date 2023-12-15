@@ -80,11 +80,13 @@ fetch('../static/JSON/data.json')
         }
 
         document.getElementById("button-turn-backward").addEventListener("click", function () {
-            handleButtonClick('backward');
+            //handleButtonClick('backward');
+            socket.emit('button', 'back');
         });
 
         document.getElementById("button-turn-forward").addEventListener("click", function () {
-            handleButtonClick('forward');
+            //handleButtonClick('forward');
+            socket.emit('button', 'forward');
         });
 
         document.getElementById("button-left").addEventListener("click", function () {
