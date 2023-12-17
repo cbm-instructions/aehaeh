@@ -262,8 +262,8 @@ app = Flask(__name__, static_url_path='/static')
 app.config['SECRET_KEY'] = 'secret'
 socketio = SocketIO(app)
 
-os.system('clear')  # clear screen, this is just for the OCD purposes
-#  os.system('cls')
+# os.system('clear')  # clear screen, this is just for the OCD purposes
+os.system('cls')
 step = 5  # linear steps for increasing/decreasing volume
 
 # tell to GPIO library to use logical PIN names/numbers, instead of the physical PIN numbers
@@ -429,6 +429,25 @@ def update_current_user_values(data):
         id_counter += 1
         reset_current_user_values()
 
+    #if key == 'Dauer':
+    #    value = data['value']
+    #    current_user_values[key] = value
+    #    print(f"Updated current_user_values[{key}] to {value}")
+    #    ##render_template("templates/completed_reservation.html")
+    #    socketio.emit('reservation_user_values', current_user_values)
+#
+    #if key == 'finish':
+    #    create_table_reservations()
+    #    write_reservation_to_database()
+    #    global id_counter
+    #    read_all_reservations_for_user(id_counter)
+    #    id_counter += 1
+    #    reset_current_user_values()
+    #    render_template('index')
+#
+    #if key == 'back-to-reservation':
+    #    render_template('index')
+
 @socketio.on('button')
 def update_current_user_values(data):
     print("update button")
@@ -440,6 +459,12 @@ def update_current_user_values(data):
         socketio.emit('new_value', {'back': 'true'})
     elif data == "ok":
         socketio.emit('new_value', {'ok': 'true'})
+    elif data == "finish":
+        socketio.emit('new_value', {'finish': 'true'})
+    elif data == "back_to_reservation":
+        socketio.emit('new_value', {'back_to_reservation': 'true'})
+
+
 #def clkClicked(channel):
 #    global counter
 #    global step
@@ -492,7 +517,6 @@ if __name__ == '__main__':
     port = 1883
     username = "user"
     password = "Test123"
-
     mqtt_thread = MQTTThread(broker_address, port, username, password)
     mqtt_thread.start()
     app.run(debug=False, host='0.0.0.0')
