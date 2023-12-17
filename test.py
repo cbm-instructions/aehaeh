@@ -1,4 +1,4 @@
-#from RPi import GPIO
+# from RPi import GPIO
 from flask import Flask, render_template
 from flask_socketio import SocketIO
 # from mfrc522 import SimpleMFRC522
@@ -10,7 +10,6 @@ from datetime import datetime, timedelta
 import time
 import os
 
-
 weekday_translations = {
     "Monday": "Montag",
     "Tuesday": "Dienstag",
@@ -20,6 +19,7 @@ weekday_translations = {
     "Saturday": "Samstag",
     "Sunday": "Sonntag"
 }
+
 
 class MQTTThread(threading.Thread):
     def __init__(self, broker_address, port, username, password):
@@ -136,7 +136,7 @@ class MQTTThread(threading.Thread):
 
     def send_all_reservations(self, client):
         while True:
-            #print("Reservations sent")
+            # print("Reservations sent")
             connection = sqlite3.connect("reservations.db")
             cursor = connection.cursor()
 
@@ -258,7 +258,7 @@ class MQTTThread(threading.Thread):
         client.loop_forever()
 
 
-app = Flask(__name__, static_url_path='/static')
+app = Flask(__name__, template_folder='templates', static_url_path='/static')
 app.config['SECRET_KEY'] = 'secret'
 socketio = SocketIO(app)
 
@@ -267,7 +267,7 @@ os.system('cls')
 step = 5  # linear steps for increasing/decreasing volume
 
 # tell to GPIO library to use logical PIN names/numbers, instead of the physical PIN numbers
-#GPIO.setmode(GPIO.BCM)
+# GPIO.setmode(GPIO.BCM)
 # set up the pins we have been using
 clk = 17
 dt = 18
@@ -275,17 +275,17 @@ back = 27
 ok = 22
 
 # set up the GPIO events on those pins
-#GPIO.setup(clk, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-#GPIO.setup(dt, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-#GPIO.setup(back, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-#GPIO.setup(ok, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+# GPIO.setup(clk, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+# GPIO.setup(dt, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+# GPIO.setup(back, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+# GPIO.setup(ok, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 # get the initial states
 counter = 0
-#clkLastState = GPIO.input(clk)
-#dtLastState = GPIO.input(dt)
-#backLastState = GPIO.input(back)
-#okLastState = GPIO.input(back)
+# clkLastState = GPIO.input(clk)
+# dtLastState = GPIO.input(dt)
+# backLastState = GPIO.input(back)
+# okLastState = GPIO.input(back)
 
 id_counter = 0
 current_user_values = {
@@ -325,10 +325,10 @@ def create_table_reservations():
     try:
         cursor.execute('''CREATE TABLE IF NOT EXISTS Reservations(
                            ID INTEGER AUTO_INCREMENT,
-                           Tischnummer TEXT,
-                           Datum TEXT,
-                           Uhrzeit TEXT,
-                           Dauer TEXT,
+                           Tischnummer TEXT NOT NULL,
+                           Datum TEXT NOT NULL,
+                           Uhrzeit TEXT NOT NULL,
+                           Dauer TEXT NOT NULL,
                            Statuscode TEXT DEFAULT "0",
                            UNIQUE(ID, Tischnummer, Datum, Uhrzeit)
                        )''')
@@ -382,9 +382,15 @@ def write_reservation_to_database():
             current_user_values["Uhrzeit"],
             current_user_values["Dauer"],
         )
-        cursor.execute(query, values)
-        connection.commit()
-        print("Record inserted successfully!")
+        if current_user_values["ID"] != "" and current_user_values["Tisch Nr."] != "" and current_user_values[
+            "Datum"] != "" and current_user_values["Uhrzeit"] != "" and current_user_values["Dauer"] != "":
+            cursor.execute(query, values)
+            connection.commit()
+            print("Record inserted successfully!")
+            return True
+        else:
+            print("Inserting Record failed!")
+            return False
     except Exception as e:
         print("Error inserting record:", e)
     finally:
@@ -411,9 +417,6 @@ def update_value():
     socketio.emit('new_value', {'value': 'false'})
 
 
-reservation_time = ""
-
-
 @socketio.on('update_current_user_values')
 def update_current_user_values(data):
     key = data['key']
@@ -421,36 +424,23 @@ def update_current_user_values(data):
     current_user_values[key] = value
     print(f"Updated current_user_values[{key}] to {value}")
 
-    if key == 'Dauer':
-        create_table_reservations()
-        write_reservation_to_database()
-        global id_counter
-        read_all_reservations_for_user(id_counter)
-        id_counter += 1
-        reset_current_user_values()
+@socketio.on('request_current_user_values')
+def request_current_user_values(data):
+    socketio.emit('display_current_user_values', current_user_values)
 
-    #if key == 'Dauer':
-    #    value = data['value']
-    #    current_user_values[key] = value
-    #    print(f"Updated current_user_values[{key}] to {value}")
-    #    ##render_template("templates/completed_reservation.html")
-    #    socketio.emit('reservation_user_values', current_user_values)
-#
-    #if key == 'finish':
-    #    create_table_reservations()
-    #    write_reservation_to_database()
-    #    global id_counter
-    #    read_all_reservations_for_user(id_counter)
-    #    id_counter += 1
-    #    reset_current_user_values()
-    #    render_template('index')
-#
-    #if key == 'back-to-reservation':
-    #    render_template('index')
+@socketio.on('finish_reservation')
+def finish_reservation(value):
+    if value == "finish":
+        create_table_reservations()
+        if write_reservation_to_database():
+            global id_counter
+            read_all_reservations_for_user(id_counter)
+            id_counter += 1
+        reset_current_user_values()
 
 @socketio.on('button')
 def update_current_user_values(data):
-    print("update button")
+    # print("update button")
     if data == "forward":
         socketio.emit('new_value', {'forward': 'true'})
     elif data == "backward":
@@ -465,7 +455,7 @@ def update_current_user_values(data):
         socketio.emit('new_value', {'back_to_reservation': 'true'})
 
 
-#def clkClicked(channel):
+# def clkClicked(channel):
 #    global counter
 #    global step
 #
@@ -478,7 +468,7 @@ def update_current_user_values(data):
 #        print("Counter ", counter)
 
 
-#def dtClicked(channel):
+# def dtClicked(channel):
 #    global counter
 #    global step
 #
@@ -491,25 +481,30 @@ def update_current_user_values(data):
 #        print("Counter ", counter)
 
 
-#def backClicked(channel):
+# def backClicked(channel):
 #    socketio.emit('new_value', {'back': 'true'})
 #    print("Back clicked")
 #
 #
-#def okClicked(channel):
+# def okClicked(channel):
 #    socketio.emit('new_value', {'ok': 'true'})
 #    print("Ok clicked")
 
 
-#GPIO.add_event_detect(clk, GPIO.FALLING, callback=clkClicked, bouncetime=300)
-#GPIO.add_event_detect(dt, GPIO.FALLING, callback=dtClicked, bouncetime=300)
-#GPIO.add_event_detect(back, GPIO.FALLING, callback=backClicked, bouncetime=300)
-#GPIO.add_event_detect(ok, GPIO.FALLING, callback=okClicked, bouncetime=300)
+# GPIO.add_event_detect(clk, GPIO.FALLING, callback=clkClicked, bouncetime=300)
+# GPIO.add_event_detect(dt, GPIO.FALLING, callback=dtClicked, bouncetime=300)
+# GPIO.add_event_detect(back, GPIO.FALLING, callback=backClicked, bouncetime=300)
+# GPIO.add_event_detect(ok, GPIO.FALLING, callback=okClicked, bouncetime=300)
 
 
 @app.route('/')
 def index():
     return render_template('index.html')
+
+
+@app.route('/reservation-completed')
+def reservation_completed():
+    return render_template('reservation_completed.html')
 
 
 if __name__ == '__main__':
@@ -523,5 +518,3 @@ if __name__ == '__main__':
     mqtt_thread.join()
 
 # GPIO.cleanup()
-
-

@@ -1,28 +1,20 @@
 document.addEventListener('DOMContentLoaded', function () {
     let socket = io.connect('http://' + document.domain + ':' + location.port)
 
-    let id = document.getElementById("ID");
-    let tischnummer = document.getElementById("Tischnummer");
-    let datum = document.getElementById("Datum");
-    let uhrzeit = document.getElementById("Uhrzeit");
-    let dauer = document.getElementById("Dauer");
-
-    console.log(id.innerText + " " + tischnummer.innerText + " " + datum.innerText + " " + uhrzeit.innerText + " " + dauer.innerText);
-
     socket.on('connect', function () {
         console.log('Connected to server');
+        socket.emit("request_current_user_values", {'request': 'true'})
     });
 
     function handleButtonClick(direction) {
         if (direction === 'finish') {
-            socket.emit('update_current_user_values', 'finish')
-        } else if (direction === 'back_to_reservation') {
-            socket.emit('update_current_user_values', 'back-to-reservation')
+            socket.emit('finish_reservation', 'finish')
         }
+        window.location.href = "/";
     }
 
     document.getElementById("button-back-to-reservation").addEventListener("click", function () {
-        socket.emit('button', 'back-to-reservation');
+        socket.emit('button', 'back_to_reservation');
     });
 
     document.getElementById("button-finish-reservation").addEventListener("click", function () {
@@ -38,12 +30,12 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    socket.on('reservation_user_values', function (data) {
-        id = data["ID"]
-        tischnummer = data["Tisch Nr."];
-        datum = data["Datum"];
-        uhrzeit = data["Uhrzeit"];
-        dauer = data["Dauer"];
-    })
+    socket.on('display_current_user_values', function (data) {
+        document.getElementById("ID").innerText = data["ID"];
+        document.getElementById("Tischnummer").innerText = data["Tisch Nr."];
+        document.getElementById("Datum").innerText = data["Datum"];
+        document.getElementById("Uhrzeit").innerText = data["Uhrzeit"];
+        document.getElementById("Dauer").innerText = data["Dauer"];
+    });
 })
 

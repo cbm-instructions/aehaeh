@@ -17,67 +17,75 @@ fetch('../static/JSON/data.json')
         let minutes = "";
 
         function handleButtonClick(direction) {
-            let labelElement = document.getElementById("label");
-
+            // Der Knob wurde nach vorne gedreht
             if (direction === 'forward') {
                 if (isSecondCircle && labelElement.innerText == "Uhrzeit") {
                     moveSecondCircleForward()
                 } else {
                     moveForward()
                 }
+                // Der Knob wurde nach hinten gedreht
             } else if (direction === 'backward') {
                 if (isSecondCircle && labelElement.innerText == "Uhrzeit") {
                     moveSecondCircleBackward()
                 } else {
                     moveBackward()
                 }
+                // Der "Weiter" Button wurde gedrückt
             } else if (direction === 'ok') {
-                let label = data[dataTypeIndex].name;
                 let selectedValue = "";
-
-                // Eingabe der Stunden bei der Uhrzeit
-                if (label == "Uhrzeit" && !isSecondCircle) {
+                // Wenn der Nutzer sich bei der Eingabe der Stunde bei der Uhrzeitansicht befindet
+                if (labelElement.innerText == "Uhrzeit" && !isSecondCircle) {
                     const fourthLiElementInFirstCircle = document.querySelector('.circle-container li:nth-child(4)');
                     hour = fourthLiElementInFirstCircle.innerText
-                    // Eingabe der Minuten bei der Uhrzeit
-                } else if (label == "Uhrzeit" && isSecondCircle) {
+                    // Wenn der Nutzer sich bei der Eingabe der Minuten bei der Uhrzeitansicht befindet
+                } else if (labelElement.innerText == "Uhrzeit" && isSecondCircle) {
                     const fourthLiElementInSecondCircle = document.querySelector('#circle-container2 li:nth-child(4)');
                     minutes = fourthLiElementInSecondCircle.innerText;
                     selectedValue = hour + ":" + minutes;
                     dataTypeIndex = (dataTypeIndex + 1) % data.length;
-                    // Jede andere Eingabe
+                    // Wenn der Nutzer sich bei jeder anderen Ansicht befindet
                 } else {
                     const fourthLiElement = document.querySelector('.circle-container li:nth-child(4)');
                     selectedValue = fourthLiElement.innerText;
                     dataTypeIndex = (dataTypeIndex + 1) % data.length;
                 }
-                if (label != "Uhrzeit" || (label == "Uhrzeit" && isSecondCircle)) {
-                    socket.emit('update_current_user_values', {key: label, value: selectedValue});
+
+                // Sendet die Nutzerdaten an das Backend
+                // Die Eingabe der Uhrzeit soll erst nach Angabe der Minuten an das Backend gesendet werden
+                if (labelElement.innerText != "Uhrzeit" || (labelElement.innerText == "Uhrzeit" && isSecondCircle)) {
+                    socket.emit('update_current_user_values', {key: labelElement.innerText, value: selectedValue});
+                    // Wenn der "Weiter" Button bei der Dauer-Ansicht geklickt wurde, dann soll die Ansicht zur Bestätigung der Reservierung geöffnet werden
+                    if (labelElement.innerText == "Dauer") {
+                        location.href = "/reservation-completed";
+                    } else {
+                        document.getElementById("button-right").removeAttribute("href");
+                    }
                 }
 
-                if (label == "Uhrzeit") {
+                if (labelElement.innerText == "Uhrzeit") {
                     isSecondCircle = !isSecondCircle;
                 }
-
                 updateDataDisplay();
+                // "Zurück" Button wird geklickt
             } else {
-                // Zurück - Button wird geklickt, wenn der Nutzer die Stunden bei der Uhrzeit eingibt
-                if (labelElement.innerText != "Tisch Nr.") {
-                    if (labelElement.innerText == "Dauer") {
-                        dataTypeIndex = (dataTypeIndex - 1 + data.length) % data.length;
-                        isSecondCircle = true;
-                        //alert(data[dataTypeIndex].name);
-                        // Zurück- Button wird geklickt, wenn der Nutzer die Minuten bei der Uhrzeit eingibt
-                    } else if (labelElement.innerText == "Uhrzeit" && isSecondCircle) {
-                        isSecondCircle = false;
-                        // Zurück- Button wird geklickt, wenn der Nutzer sich nicht bei der Uhrzeit befindet
-                    } else {
-                        dataTypeIndex = (dataTypeIndex - 1 + data.length) % data.length;
-                    }
-                    updateDataDisplay();
+                // Wenn der Nutzer sich bei der Ansicht der "Dauer" befindet, dann soll beim "Zurück" klicken die Uhrzeit-Ansicht geöffnet werden und der Nutzer
+                // kann die Minuten der Uhrzeit bearbeiten
+                if (labelElement.innerText == "Dauer") {
+                    dataTypeIndex = (dataTypeIndex - 1 + data.length) % data.length;
+                    isSecondCircle = true;
+                // Wenn der Nutzer sich bei der Ansicht der "Uhrzeit-Minuten" befindet, dann sollen beim "Zurück" klicken die Stunden gehighlighted werden und der Nutzer
+                // kann die Stunden der Uhrzeit bearbeiten.
+                } else if (labelElement.innerText == "Uhrzeit" && isSecondCircle) {
+                    isSecondCircle = false;
+                // Wenn der Nutzer sich bei jeder anderen Ansicht befindet
+                } else {
+                    dataTypeIndex = (dataTypeIndex - 1 + data.length) % data.length;
                 }
+                updateDataDisplay();
             }
         }
+
 
         document.getElementById("button-turn-backward").addEventListener("click", function () {
             socket.emit('button', 'backward');
@@ -88,6 +96,8 @@ fetch('../static/JSON/data.json')
         });
 
         document.getElementById("button-left").addEventListener("click", function () {
+            console.log("Not Ready for next page");
+            document.getElementById("button-right").removeAttribute("href");
             socket.emit('button', 'back');
         });
 
@@ -131,13 +141,11 @@ fetch('../static/JSON/data.json')
 
             // Wenn das Ereignis 'right' empfangen wird
             if (data.forward) {
-                console.log("right")
                 handleButtonClick('forward');
             }
 
             // Wenn das Ereignis 'left' empfangen wird
             if (data.backward) {
-                console.log("left")
                 handleButtonClick('backward');
             }
         });
@@ -151,19 +159,12 @@ fetch('../static/JSON/data.json')
             let secondValues = selectedData.secondValues;
             ulElement.innerHTML = '';
 
-            if (labelElement.innerText != "Uhrzeit") {
-                for (let i = 0; i < firstValues.length; i++) {
-                    let liElement = document.createElement('li');
-                    liElement.appendChild(document.createTextNode(firstValues[i]))
-                    ulElement.appendChild(liElement)
-                }
-            } else {
-                for (let i = 0; i < firstValues.length; i++) {
-                    let liElement = document.createElement('li');
-                    liElement.appendChild(document.createTextNode(firstValues[i]))
-                    ulElement.appendChild(liElement)
-                }
-
+            for (let i = 0; i < firstValues.length; i++) {
+                let liElement = document.createElement('li');
+                liElement.appendChild(document.createTextNode(firstValues[i]))
+                ulElement.appendChild(liElement)
+            }
+            if (labelElement.innerText == "Uhrzeit") {
                 for (let i = 0; i < secondValues.length; i++) {
                     let liElement = document.createElement('li');
                     liElement.appendChild(document.createTextNode(secondValues[i]))
@@ -191,6 +192,7 @@ fetch('../static/JSON/data.json')
                 ulElement2.style.backgroundColor = 'rgba(236,167,118,255)';
             }
         }
+
         setBackground();
         updateDataDisplay(); // Initialanzeige
     })
