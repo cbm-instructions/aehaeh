@@ -449,10 +449,6 @@ def update_current_user_values(data):
         socketio.emit('new_value', {'back': 'true'})
     elif data == "ok":
         socketio.emit('new_value', {'ok': 'true'})
-    elif data == "finish":
-        socketio.emit('new_value', {'finish': 'true'})
-    elif data == "back_to_reservation":
-        socketio.emit('new_value', {'back_to_reservation': 'true'})
 
 
 # def clkClicked(channel):
