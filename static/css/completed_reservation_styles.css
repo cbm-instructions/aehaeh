@@ -10,22 +10,23 @@ body {
     margin-bottom: 20px;
 }
 
-h1{
+h1 {
     font-size: 3em;
 }
+
 .reservation-details h2 {
-    font-size: 2.5em; /* Beispiel für die Überschrift */
+    font-size: 2.5em;
 }
 
 .reservation-details p {
-    font-size: 30px; /* Beispiel für den Textinhalt */
-    line-height: 1.5; /* Beispiel für den Zeilenabstand */
+    font-size: 30px;
+    line-height: 1.5;
 }
 
 .button {
     font-size: 40px;
-    position: fixed; /* Feste Positionierung */
-    bottom: 20px; /* 20px vom unteren Rand entfernt */
+    position: fixed;
+    bottom: 20px;
 }
 
 .button .underline {
@@ -36,11 +37,11 @@ h1{
 }
 
 #button-finish-reservation {
-    left: auto; /* Automatische Positionierung am rechten Rand */
-    right: 20px; /* 20px vom rechten Rand entfernt */
+    left: auto;
+    right: 20px;
 }
 
 #button-back-to-reservation {
-    right: auto; /* Automatische Positionierung am linken Rand */
-    left: 20px; /* 20px vom linken Rand entfernt */
+    right: auto;
+    left: 20px;
 }
