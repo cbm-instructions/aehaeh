@@ -4,6 +4,7 @@ body {
 }
 
 .reservation-details {
+    background-color: rgba(236,167,118,255);
     border: 1px solid #ccc;
     padding-left: 10px;
     border-radius: 5px;
