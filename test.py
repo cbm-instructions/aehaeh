@@ -136,7 +136,7 @@ class MQTTThread(threading.Thread):
 
     def send_all_reservations(self, client):
         while True:
-            print("Reservations sent")
+            #print("Reservations sent")
             connection = sqlite3.connect("reservations.db")
             cursor = connection.cursor()
 
@@ -357,11 +357,12 @@ def read_all_reservations_for_user(user_id):
             else:
                 print("---------------")
                 for row in rows:
-                    print("Tischnummer: ", row[0])
-                    print("Datum: ", row[1])
-                    print("Uhrzeit: ", row[2])
-                    print("Dauer: ", row[3])
-                    print("Statuscode: ", row[4])
+                    print("ID: ", row[0])
+                    print("Tischnummer: ", row[1])
+                    print("Datum: ", row[2])
+                    print("Uhrzeit: ", row[3])
+                    print("Dauer: ", row[4])
+                    print("Statuscode: ", row[5])
                     print("---------------")
                 entry_found = True
     finally:
@@ -427,7 +428,6 @@ def update_current_user_values(data):
         read_all_reservations_for_user(id_counter)
         id_counter += 1
         reset_current_user_values()
-
 
 @socketio.on('button')
 def update_current_user_values(data):

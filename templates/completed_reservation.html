@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Divs drehen</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="../static/css/completed_reservation_styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=M+PLUS+2:wght@400;500;600&display=swap"
+          rel="stylesheet">
+    <script src="../static/javascript/script.js"></script>
+</head>
+<body>
+
+<h1>Tischreservierung</h1>
+
+<div class="reservation-details">
+    <h2>Reservierungsdetails</h2>
+    <p><strong>Tischnummer:</strong> <span id="table-number">Tischnummer hier</span></p>
+    <p><strong>Datum:</strong> <span id="reservation-date">Datum hier</span></p>
+    <p><strong>Uhrzeit:</strong> <span id="reservation-time">Uhrzeit hier</span></p>
+    <p><strong>Dauer:</strong> <span id="reservation-duration">Dauer hier</span></p>
+</div>
+<div id="button-back-to-reservation" class="button">
+    Zurück
+    <div class="underline"></div>
+</div>
+<div id="button-finish-reservation" class="button">
+    Reservierung abschließen
+    <div class="underline"></div>
+</div>
+</body>
+</html>

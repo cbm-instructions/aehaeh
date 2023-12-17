@@ -1,0 +1,46 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+.reservation-details {
+    border: 1px solid #ccc;
+    padding-left: 10px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+h1{
+    font-size: 3em;
+}
+.reservation-details h2 {
+    font-size: 2.5em; /* Beispiel für die Überschrift */
+}
+
+.reservation-details p {
+    font-size: 30px; /* Beispiel für den Textinhalt */
+    line-height: 1.5; /* Beispiel für den Zeilenabstand */
+}
+
+.button {
+    font-size: 40px;
+    position: fixed; /* Feste Positionierung */
+    bottom: 20px; /* 20px vom unteren Rand entfernt */
+}
+
+.button .underline {
+    background-color: black;
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+}
+
+#button-finish-reservation {
+    left: auto; /* Automatische Positionierung am rechten Rand */
+    right: 20px; /* 20px vom rechten Rand entfernt */
+}
+
+#button-back-to-reservation {
+    right: auto; /* Automatische Positionierung am linken Rand */
+    left: 20px; /* 20px vom linken Rand entfernt */
+}
