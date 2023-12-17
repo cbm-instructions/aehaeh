@@ -96,7 +96,6 @@ fetch('../static/JSON/data.json')
         });
 
         document.getElementById("button-left").addEventListener("click", function () {
-            console.log("Not Ready for next page");
             document.getElementById("button-right").removeAttribute("href");
             socket.emit('button', 'back');
         });

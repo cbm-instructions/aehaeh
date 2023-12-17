@@ -7,26 +7,26 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     function handleButtonClick(direction) {
-        if (direction === 'finish') {
+        if (direction === 'ok') {
             socket.emit('finish_reservation', 'finish')
         }
         window.location.href = "/";
     }
 
     document.getElementById("button-back-to-reservation").addEventListener("click", function () {
-        socket.emit('button', 'back_to_reservation');
+        socket.emit('button', 'back');
     });
 
     document.getElementById("button-finish-reservation").addEventListener("click", function () {
-        socket.emit('button', 'finish');
+        socket.emit('button', 'ok');
     });
 
     socket.on('new_value', function (data) {
-        if (data['finish']) {
-            handleButtonClick('finish')
+        if (data['ok']) {
+            handleButtonClick('ok')
         }
-        if (data['back_to_reservation']) {
-            handleButtonClick('back_to_reservation')
+        if (data['back']) {
+            handleButtonClick('back')
         }
     });
 
