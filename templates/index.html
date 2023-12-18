@@ -1,35 +1,142 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Tischplaner</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <link rel="stylesheet" href="../static/css/styles.css">
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../static/css/start_screen_styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=M+PLUS+2:wght@400;500;600&display=swap"
-          rel="stylesheet">
-    <script src="../static/javascript/script.js"></script>
+    <script src="../static/javascript/start_screen_script.js"></script>
+    <title>Startbildschirm</title>
 </head>
 <body>
-<ul class='circle-container' id="circle-container"></ul>
-<ul class='circle-container' id="circle-container2"></ul>
-<div class="label" id="label"></div>
-<div id="button-left" class="button">
-    Zurück
-    <div class="underline"></div>
+<div class="container">
+    <div class="row">
+        <div class="header_cell">Denkraum</div>
+        <div id="time" class="header_cell"></div>
+        <div id="date" class="header_cell">20.04.2000</div>
+    </div>
+    <div class="row">
+        <div class="tischnr_cell">Tisch Nr. 1 2 3 4 5 6</div>
+    </div>
+    <div class="table_row">
+        <div class="table_cell">
+            <table>
+                <tr>
+                    <th></th>
+                    <th><p>07:00</p></th>
+                    <th>08:00</th>
+                    <th>09:00</th>
+                    <th>10:00</th>
+                    <th>11:00</th>
+                    <th>12:00</th>
+                    <th>13:00</th>
+                    <th>14:00</th>
+                    <th>15:00</th>
+                    <th>16:00</th>
+                    <th>17:00</th>
+                    <th>18:00</th>
+                    <th>19:00</th>
+                </tr>
+                <tr id="Montag">
+                    <td>
+                        <p>Mo.</p>
+                        <p>20.</p>
+                    </td>
+                    <td id="1"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr id="Dienstag">
+                    <td>
+                        <p>Di.</p>
+                        <p>21.</p>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr id="Mittwoch">
+                    <td>
+                        <p>Mi.</p>
+                        <p>22.</p>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr id="Donnerstag">
+                    <td>
+                        <p>Do.</p>
+                        <p>23.</p>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr id="Freitag">
+                    <td>
+                        <p>Fr.</p>
+                        <p>24.</p>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </table>
+        </div>
+    </div>
 </div>
-<div id="button-turn-backward" class="button">
-    Rückwärts
-    <div class="underline"></div>
-</div>
-<div id="button-turn-forward" class="button">
-    Vorwärts
-    <div class="underline"></div>
-</div>
-<div id="button-right" class="button">
-    Weiter
+<div id="button-go-to-reservation" class="button">
+    Zur Reservierung
     <div class="underline"></div>
 </div>
 </body>

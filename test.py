@@ -493,15 +493,18 @@ def update_current_user_values(data):
 # GPIO.add_event_detect(ok, GPIO.FALLING, callback=okClicked, bouncetime=300)
 
 
-@app.route('/')
-def index():
-    return render_template('index.html')
+@app.route('/reservation_page')
+def reservation_page():
+    return render_template('reservation_page.html')
 
 
-@app.route('/reservation-completed')
+@app.route('/reservation_completed')
 def reservation_completed():
     return render_template('reservation_completed.html')
 
+@app.route('/')
+def start_screen():
+    return render_template('index.html')
 
 if __name__ == '__main__':
     broker_address = "localhost"

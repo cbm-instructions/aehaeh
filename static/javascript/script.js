@@ -57,7 +57,7 @@ fetch('../static/JSON/data.json')
                     socket.emit('update_current_user_values', {key: labelElement.innerText, value: selectedValue});
                     // Wenn der "Weiter" Button bei der Dauer-Ansicht geklickt wurde, dann soll die Ansicht zur Bestätigung der Reservierung geöffnet werden
                     if (labelElement.innerText == "Dauer") {
-                        location.href = "/reservation-completed";
+                        location.href = "/reservation_completed";
                     } else {
                         document.getElementById("button-right").removeAttribute("href");
                     }

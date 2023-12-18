@@ -72,3 +72,23 @@ tr{
     border-collapse: collapse;
     padding-bottom:20px ;
 }
+
+
+.button {
+    font-size: 40px;
+    position: fixed;
+    bottom: 20px;
+}
+
+.button .underline {
+    background-color: black;
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+}
+
+
+#button-go-to-reservation {
+    left: auto;
+    right: 20px;
+}
