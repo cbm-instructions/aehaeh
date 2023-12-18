@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     document.getElementById("button-go-to-reservation").addEventListener("click", function () {
-        console.log("beeb")
         socket.emit('button', 'ok');
     });
 

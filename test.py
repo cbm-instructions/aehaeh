@@ -1,4 +1,4 @@
-# from RPi import GPIO
+from RPi import GPIO
 from flask import Flask, render_template
 from flask_socketio import SocketIO
 # from mfrc522 import SimpleMFRC522
@@ -267,7 +267,7 @@ os.system('cls')
 step = 5  # linear steps for increasing/decreasing volume
 
 # tell to GPIO library to use logical PIN names/numbers, instead of the physical PIN numbers
-# GPIO.setmode(GPIO.BCM)
+GPIO.setmode(GPIO.BCM)
 # set up the pins we have been using
 clk = 17
 dt = 18
@@ -275,17 +275,17 @@ back = 27
 ok = 22
 
 # set up the GPIO events on those pins
-# GPIO.setup(clk, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-# GPIO.setup(dt, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-# GPIO.setup(back, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-# GPIO.setup(ok, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(clk, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(dt, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(back, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(ok, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 # get the initial states
 counter = 0
-# clkLastState = GPIO.input(clk)
-# dtLastState = GPIO.input(dt)
-# backLastState = GPIO.input(back)
-# okLastState = GPIO.input(back)
+clkLastState = GPIO.input(clk)
+dtLastState = GPIO.input(dt)
+backLastState = GPIO.input(back)
+okLastState = GPIO.input(back)
 
 id_counter = 0
 current_user_values = {
@@ -441,56 +441,56 @@ def finish_reservation(value):
 @socketio.on('button')
 def update_current_user_values(data):
     # print("update button")
-    if data == "forward":
-        socketio.emit('new_value', {'forward': 'true'})
-    elif data == "backward":
-        socketio.emit('new_value', {'backward': 'true'})
+    if data == "left":
+        socketio.emit('new_value', {'left': 'true'})
+    elif data == "right":
+        socketio.emit('new_value', {'right': 'true'})
     elif data == "back":
         socketio.emit('new_value', {'back': 'true'})
     elif data == "ok":
         socketio.emit('new_value', {'ok': 'true'})
 
 
-# def clkClicked(channel):
-#    global counter
-#    global step
-#
-#    clkState = GPIO.input(clk)
-#    dtState = GPIO.input(dt)
-#
-#    if clkState == 0 and dtState == 1:
-#        counter = counter + step
-#        socketio.emit('new_value', {'left': 'true'})
-#        print("Counter ", counter)
+def clkClicked(channel):
+   global counter
+   global step
+
+   clkState = GPIO.input(clk)
+   dtState = GPIO.input(dt)
+
+   if clkState == 0 and dtState == 1:
+       counter = counter + step
+       socketio.emit('new_value', {'left': 'true'})
+       print("Counter ", counter)
 
 
-# def dtClicked(channel):
-#    global counter
-#    global step
-#
-#    clkState = GPIO.input(clk)
-#    dtState = GPIO.input(dt)
-#
-#    if clkState == 1 and dtState == 0:
-#        counter = counter - step
-#        socketio.emit('new_value', {'right': 'true'})
-#        print("Counter ", counter)
+def dtClicked(channel):
+   global counter
+   global step
+
+   clkState = GPIO.input(clk)
+   dtState = GPIO.input(dt)
+
+   if clkState == 1 and dtState == 0:
+       counter = counter - step
+       socketio.emit('new_value', {'right': 'true'})
+       print("Counter ", counter)
 
 
-# def backClicked(channel):
-#    socketio.emit('new_value', {'back': 'true'})
-#    print("Back clicked")
-#
-#
-# def okClicked(channel):
-#    socketio.emit('new_value', {'ok': 'true'})
-#    print("Ok clicked")
+def backClicked(channel):
+   socketio.emit('new_value', {'back': 'true'})
+   print("Back clicked")
 
 
-# GPIO.add_event_detect(clk, GPIO.FALLING, callback=clkClicked, bouncetime=300)
-# GPIO.add_event_detect(dt, GPIO.FALLING, callback=dtClicked, bouncetime=300)
-# GPIO.add_event_detect(back, GPIO.FALLING, callback=backClicked, bouncetime=300)
-# GPIO.add_event_detect(ok, GPIO.FALLING, callback=okClicked, bouncetime=300)
+def okClicked(channel):
+   socketio.emit('new_value', {'ok': 'true'})
+   print("Ok clicked")
+
+
+GPIO.add_event_detect(clk, GPIO.FALLING, callback=clkClicked, bouncetime=300)
+GPIO.add_event_detect(dt, GPIO.FALLING, callback=dtClicked, bouncetime=300)
+GPIO.add_event_detect(back, GPIO.FALLING, callback=backClicked, bouncetime=300)
+GPIO.add_event_detect(ok, GPIO.FALLING, callback=okClicked, bouncetime=300)
 
 
 @app.route('/reservation_page')
@@ -516,4 +516,4 @@ if __name__ == '__main__':
     app.run(debug=False, host='0.0.0.0')
     mqtt_thread.join()
 
-# GPIO.cleanup()
+GPIO.cleanup()

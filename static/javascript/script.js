@@ -18,14 +18,14 @@ fetch('../static/JSON/data.json')
 
         function handleButtonClick(direction) {
             // Der Knob wurde nach vorne gedreht
-            if (direction === 'forward') {
+            if (direction === 'right') {
                 if (isSecondCircle && labelElement.innerText == "Uhrzeit") {
                     moveSecondCircleForward()
                 } else {
                     moveForward()
                 }
                 // Der Knob wurde nach hinten gedreht
-            } else if (direction === 'backward') {
+            } else if (direction === 'left') {
                 if (isSecondCircle && labelElement.innerText == "Uhrzeit") {
                     moveSecondCircleBackward()
                 } else {
@@ -88,11 +88,11 @@ fetch('../static/JSON/data.json')
 
 
         document.getElementById("button-turn-backward").addEventListener("click", function () {
-            socket.emit('button', 'backward');
+            socket.emit('button', 'right');
         });
 
         document.getElementById("button-turn-forward").addEventListener("click", function () {
-            socket.emit('button', 'forward');
+            socket.emit('button', 'left');
         });
 
         document.getElementById("button-left").addEventListener("click", function () {
@@ -139,13 +139,13 @@ fetch('../static/JSON/data.json')
             }
 
             // Wenn das Ereignis 'right' empfangen wird
-            if (data.forward) {
-                handleButtonClick('forward');
+            if (data.right) {
+                handleButtonClick('right');
             }
 
             // Wenn das Ereignis 'left' empfangen wird
-            if (data.backward) {
-                handleButtonClick('backward');
+            if (data.left) {
+                handleButtonClick('left');
             }
         });
 
