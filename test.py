@@ -262,8 +262,8 @@ app = Flask(__name__, template_folder='templates', static_url_path='/static')
 app.config['SECRET_KEY'] = 'secret'
 socketio = SocketIO(app)
 
-# os.system('clear')  # clear screen, this is just for the OCD purposes
-os.system('cls')
+os.system('clear')  # clear screen, this is just for the OCD purposes
+# os.system('cls')
 step = 5  # linear steps for increasing/decreasing volume
 
 # tell to GPIO library to use logical PIN names/numbers, instead of the physical PIN numbers

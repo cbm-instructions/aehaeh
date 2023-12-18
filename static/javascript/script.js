@@ -69,6 +69,9 @@ fetch('../static/JSON/data.json')
                 updateDataDisplay();
                 // "Zurück" Button wird geklickt
             } else {
+                if (labelElement.innerText == "Tisch Nr."){
+                    location.href = "/";
+                }    
                 // Wenn der Nutzer sich bei der Ansicht der "Dauer" befindet, dann soll beim "Zurück" klicken die Uhrzeit-Ansicht geöffnet werden und der Nutzer
                 // kann die Minuten der Uhrzeit bearbeiten
                 if (labelElement.innerText == "Dauer") {
