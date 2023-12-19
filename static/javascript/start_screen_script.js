@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     socket.on('connect', function () {
         console.log('Connected to server');
+        socket.emit('read_rfid', 'read');
     });
 
     function handleButtonClick(direction) {
@@ -20,5 +21,11 @@ document.addEventListener('DOMContentLoaded', function () {
             handleButtonClick('ok')
         }
     });
+    
+    socket.on('rfid_id', function (data) {
+        if (data['id']){
+            handleButtonClick('ok')
+    });    
+    
 })
 

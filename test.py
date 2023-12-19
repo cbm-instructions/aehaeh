@@ -1,7 +1,7 @@
 from RPi import GPIO
 from flask import Flask, render_template
 from flask_socketio import SocketIO
-# from mfrc522 import SimpleMFRC522
+from mfrc522 import SimpleMFRC522
 import sqlite3
 import paho.mqtt.client as mqtt
 import threading
@@ -19,6 +19,8 @@ weekday_translations = {
     "Saturday": "Samstag",
     "Sunday": "Sonntag"
 }
+     
+
 
 
 class MQTTThread(threading.Thread):
@@ -287,9 +289,9 @@ dtLastState = GPIO.input(dt)
 backLastState = GPIO.input(back)
 okLastState = GPIO.input(back)
 
-id_counter = 0
+# id_counter = 0
 current_user_values = {
-    "ID": id_counter,
+    "ID": "",
     "Tisch Nr.": "",
     "Datum": "",
     "Uhrzeit": "",
@@ -298,25 +300,12 @@ current_user_values = {
 
 
 def reset_current_user_values():
-    current_user_values["ID"] = id_counter
+    current_user_values["ID"] = ""
     current_user_values["Tisch Nr."] = ""
     current_user_values["Datum"] = ""
     current_user_values["Uhrzeit"] = ""
     current_user_values["Dauer"] = ""
     current_user_values["Statuscode"] = "0"
-
-
-# def read_from_rfid():
-#   reader = SimpleMFRC522()
-#   text = ""
-#   try:
-#       while True:
-#           text = reader.read()
-#           time.sleep(0.5)
-#           if text != "":
-#               break;
-#   return text
-
 
 def create_table_reservations():
     connection = sqlite3.connect("reservations.db")
@@ -433,10 +422,31 @@ def finish_reservation(value):
     if value == "finish":
         create_table_reservations()
         if write_reservation_to_database():
-            global id_counter
-            read_all_reservations_for_user(id_counter)
-            id_counter += 1
+            # global id_counter
+            read_all_reservations_for_user(current_user_values["ID"])
+            # id_counter += 1
         reset_current_user_values()
+        
+        
+def read_rfid_thread():
+    try:
+        global current_user_values
+        while True:
+            id, text = reader.read()
+            current_user_values["ID"] = id
+            print(current_user_values["ID"])
+            #if current_user_values["ID"] != ""
+            #    break
+        socketio.emit("rfid_id", {"id": current_user_values["ID"]})
+        
+        
+        
+@socketio.on('read_rfid')
+def read_rfid(data):
+    if data == "read":
+        threading.Thread(target=read_rfid_thread).start()
+        
+        
 
 @socketio.on('button')
 def update_current_user_values(data):
