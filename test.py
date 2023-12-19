@@ -19,8 +19,6 @@ weekday_translations = {
     "Saturday": "Samstag",
     "Sunday": "Sonntag"
 }
-     
-
 
 
 class MQTTThread(threading.Thread):
@@ -307,6 +305,7 @@ def reset_current_user_values():
     current_user_values["Dauer"] = ""
     current_user_values["Statuscode"] = "0"
 
+
 def create_table_reservations():
     connection = sqlite3.connect("reservations.db")
     cursor = connection.cursor()
@@ -413,9 +412,11 @@ def update_current_user_values(data):
     current_user_values[key] = value
     print(f"Updated current_user_values[{key}] to {value}")
 
+
 @socketio.on('request_current_user_values')
 def request_current_user_values(data):
     socketio.emit('display_current_user_values', current_user_values)
+
 
 @socketio.on('finish_reservation')
 def finish_reservation(value):
@@ -426,8 +427,8 @@ def finish_reservation(value):
             read_all_reservations_for_user(current_user_values["ID"])
             # id_counter += 1
         reset_current_user_values()
-        
-        
+
+
 def read_rfid_thread():
     try:
         global current_user_values
@@ -435,18 +436,16 @@ def read_rfid_thread():
             id, text = reader.read()
             current_user_values["ID"] = id
             print(current_user_values["ID"])
-            #if current_user_values["ID"] != ""
+            # if current_user_values["ID"] != ""
             #    break
         socketio.emit("rfid_id", {"id": current_user_values["ID"]})
-        
-        
-        
+
+
 @socketio.on('read_rfid')
 def read_rfid(data):
     if data == "read":
         threading.Thread(target=read_rfid_thread).start()
-        
-        
+
 
 @socketio.on('button')
 def update_current_user_values(data):
@@ -462,39 +461,39 @@ def update_current_user_values(data):
 
 
 def clkClicked(channel):
-   global counter
-   global step
+    global counter
+    global step
 
-   clkState = GPIO.input(clk)
-   dtState = GPIO.input(dt)
+    clkState = GPIO.input(clk)
+    dtState = GPIO.input(dt)
 
-   if clkState == 0 and dtState == 1:
-       counter = counter + step
-       socketio.emit('new_value', {'left': 'true'})
-       print("Counter ", counter)
+    if clkState == 0 and dtState == 1:
+        counter = counter + step
+        socketio.emit('new_value', {'left': 'true'})
+        print("Counter ", counter)
 
 
 def dtClicked(channel):
-   global counter
-   global step
+    global counter
+    global step
 
-   clkState = GPIO.input(clk)
-   dtState = GPIO.input(dt)
+    clkState = GPIO.input(clk)
+    dtState = GPIO.input(dt)
 
-   if clkState == 1 and dtState == 0:
-       counter = counter - step
-       socketio.emit('new_value', {'right': 'true'})
-       print("Counter ", counter)
+    if clkState == 1 and dtState == 0:
+        counter = counter - step
+        socketio.emit('new_value', {'right': 'true'})
+        print("Counter ", counter)
 
 
 def backClicked(channel):
-   socketio.emit('new_value', {'back': 'true'})
-   print("Back clicked")
+    socketio.emit('new_value', {'back': 'true'})
+    print("Back clicked")
 
 
 def okClicked(channel):
-   socketio.emit('new_value', {'ok': 'true'})
-   print("Ok clicked")
+    socketio.emit('new_value', {'ok': 'true'})
+    print("Ok clicked")
 
 
 GPIO.add_event_detect(clk, GPIO.FALLING, callback=clkClicked, bouncetime=300)
@@ -512,9 +511,11 @@ def reservation_page():
 def reservation_completed():
     return render_template('reservation_completed.html')
 
+
 @app.route('/')
 def start_screen():
     return render_template('index.html')
+
 
 if __name__ == '__main__':
     broker_address = "localhost"
