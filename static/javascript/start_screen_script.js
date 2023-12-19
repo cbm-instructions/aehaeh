@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', function () {
     socket.on('rfid_id', function (data) {
         if (data['id']){
             handleButtonClick('ok')
+        }
     });    
     
 })

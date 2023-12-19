@@ -428,24 +428,22 @@ def finish_reservation(value):
             # id_counter += 1
         reset_current_user_values()
 
-
 def read_rfid_thread():
+    reader = SimpleMFRC522()
     try:
-        global current_user_values
         while True:
-            id, text = reader.read()
-            current_user_values["ID"] = id
-            print(current_user_values["ID"])
-            # if current_user_values["ID"] != ""
-            #    break
+            id = reader.read_id()
+            current_user_values["ID"] = hex(id)
+            if current_user_values["ID"] != "":
+                break
+    finally:
         socketio.emit("rfid_id", {"id": current_user_values["ID"]})
-
+        
 
 @socketio.on('read_rfid')
 def read_rfid(data):
     if data == "read":
         threading.Thread(target=read_rfid_thread).start()
-
 
 @socketio.on('button')
 def update_current_user_values(data):
