@@ -11,15 +11,24 @@
 <div class="container">
     <div class="row">
         <div class="header_cell" style="font-weight: bold; font-size: 20px"><p>Denkraum</p><p>Gebäude A</p></div>
-        <div id="time" class="header_cell" style="font-weight: bold; font-size: 92px; text-align: center" >12:00</div>
-        <div id="date" class="header_cell" style="font-weight: bold; font-size: 20px; text-align: right"><p>Montag</p><p>20.04.2000</p></div>
+        <div id="time" class="header_cell" style="font-weight: bold; font-size: 92px; text-align: center" ></div>
+        <div id="date" class="header_cell" style="font-weight: bold; font-size: 20px; text-align: right"><p>Mittwoch</p><p>10.01.2024</p></div>
     </div>
     <div class="row">
-        <div class="tischnr_cell" style="font-weight: bold; font-size: 50px; border-bottom: 2px solid black">Tisch Nr. 1 2 3 4 5 6</div>
+        <div id="tischnr_cell" class="tischnr_cell" style="font-weight: bold; font-size: 50px; border-bottom: 2px solid black">Tisch Nr.
+            <div> 1</div>
+            <div> 2</div>
+            <div> 3</div>
+            <div> 4</div>
+            <div> 5</div>
+            <div> 6</div>
+            <div> 7</div>
+            <div> 8</div>
+        </div>
     </div>
     <div class="table_row">
         <div class="table_cell">
-            <table>
+            <table class="real_table" id="myTable">
                 <tr>
                     <th id="header_spacing"></th>
                     <th><p>07:00</p></th>
@@ -329,6 +338,14 @@
             </table>
         </div>
     </div>
+</div>
+<div id="button-turn-backward" class="button">
+    Rückwärts
+    <div class="underline"></div>
+</div>
+<div id="button-turn-forward" class="button">
+    Vorwärts
+    <div class="underline"></div>
 </div>
 <div id="button-go-to-reservation" class="button">
     Zur Reservierung

@@ -2,7 +2,7 @@
 .container {
     width: 100%;
     overflow: hidden; /* Clear floats */
-    background-color: wheat;
+    /*background-color: wheat;*/
 }
 
 /* Style the rows */
@@ -37,6 +37,10 @@
     box-sizing: border-box;
     padding: 20px;
     font-size: 25px;
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    margin-right: 15px; /* Add spacing between the numbers if desired */
 }
 
 .table_cell {
@@ -44,6 +48,7 @@
     float: left;
     box-sizing: border-box;
     padding: 10px;
+
 }
 table{
     table-layout: fixed;
@@ -54,6 +59,9 @@ table{
     width: 5%;
     background-color: red;
 }
+.highlight {
+      background-color: red;
+    }
 
 .hours{
     width: 100%;
@@ -114,6 +122,10 @@ tr{
     right: 20px;
 }
 
+.tischnr_cell > div {
+    margin-right: 15px; /* Add spacing between the numbers if desired */
+    margin-left: 15px; /* Add spacing between the numbers if desired */
+}
 #header_spacing{
     width: 32px
 }
@@ -131,4 +143,16 @@ tr{
     border-right: 1px solid black;
     border-bottom: 1px solid black;
     border-top: 1px solid black;
+}
+
+
+#button-turn-backward{
+    position: absolute;
+    bottom: 20px;
+    left: 200px;
+}
+#button-turn-forward{
+    position: absolute;
+    bottom:20px;
+    right: 400px;
 }
