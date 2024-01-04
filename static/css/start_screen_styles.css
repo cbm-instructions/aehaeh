@@ -2,6 +2,7 @@
 .container {
     width: 100%;
     overflow: hidden; /* Clear floats */
+    background-color: wheat;
 }
 
 /* Style the rows */
@@ -22,12 +23,12 @@
 
 /* Style the cells */
 .header_cell {
+    padding-right: 20px;
     width: 33.33%;
     float: left;
     box-sizing: border-box;
-    padding: 10px;
-    border: 1px solid #dddddd;
-    text-align: center;
+    border-bottom: 2px solid black;
+    text-align: left;
 }
 
 .tischnr_cell {
@@ -43,10 +44,10 @@
     float: left;
     box-sizing: border-box;
     padding: 10px;
-    border: 1px solid #dddddd;
 }
 table{
     table-layout: fixed;
+
 }
 .days {
     float: left;
@@ -58,13 +59,33 @@ table{
     width: 100%;
     background-color: orchid;
 }
-th, td {
+th{
     display: table-cell;
     text-align: center;
-    border: 1px solid gray;
+    border: 1px solid black;
     vertical-align: middle;
     word-wrap: break-word;
 }
+
+td {
+    display: table-cell;
+    text-align: center;
+    vertical-align: middle;
+    word-wrap: break-word;
+}
+td:nth-child(even) {
+    border-left: 1px solid black;
+    border-right: 1px dotted black;
+    border-bottom: 1px solid black;
+    border-top: 1px solid black;
+}
+td:nth-child(odd) {
+    /*border-left: 1px solid #dddddd;*/
+    /*border-right: 1px dotted #dddddd;*/
+    border-bottom: 1px solid black;
+    border-top: 1px solid black;
+}
+
 tr{
     width: 100%;
     display: table;
@@ -91,4 +112,23 @@ tr{
 #button-go-to-reservation {
     left: auto;
     right: 20px;
+}
+
+#header_spacing{
+    width: 32px
+}
+
+.left_most{
+    border-left: 1px solid black;
+    border-right: 1px dotted black;
+    border-bottom: 1px solid black;
+    border-top: 1px solid black;
+    /*height: 170px;*/
+}
+
+.right_most{
+    border-left: 1px dotted black;
+    border-right: 1px solid black;
+    border-bottom: 1px solid black;
+    border-top: 1px solid black;
 }
