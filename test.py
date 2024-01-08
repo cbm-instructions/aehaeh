@@ -90,7 +90,7 @@ class MQTTThread(threading.Thread):
             if not rows:
                 next_reservation_time = self.find_next_reservation_if_exists(table_number, check_in_date,
                                                                              check_in_time_rounded)
-                return {"reserviert": False, "Nächste Reservierung": next_reservation_time}
+                return {"Statuscode": row[5], "Nächste Reservierung": next_reservation_time}
 
             # Es wurden Reservierungen zu dem Nutzer für diesen Tag gefunden. Es wird geprüft, ob
             # es sich um die Reservierung des Nutzers handelt. Dieser darf maximal 20 Minüten zu spät auftauchen.
@@ -99,6 +99,7 @@ class MQTTThread(threading.Thread):
                 max_time = reservation_time + timedelta(minutes=20)
                 reservation_date = datetime.strptime(row[2], "%d.%m.%Y")
                 reservation_duration = row[4]
+                reservation_statuscode = row[5]
                 print("Reservierung gefunden.")
                 # Eine Reservierung ist dann gültig, wenn
                 # - Die Reservierung vor oder zur selben Zeit des check-ins stattfindet
@@ -111,7 +112,7 @@ class MQTTThread(threading.Thread):
                     print("Reservierungs-Uhrzeit:", reservation_time.strftime("%H:%M"), "Aktuelle-Uhrzeit:",
                           check_in_time,
                           "Maximale-Uhrzeit", max_time.strftime("%H:%M"))
-                    return {"reserviert": True, "Datum": str(reservation_date.strftime("%d.%m.%Y")),
+                    return {"Statuscode": reservation_statuscode, "Datum": str(reservation_date.strftime("%d.%m.%Y")),
                             "Uhrzeit": reservation_time.strftime("%H:%M"), "Dauer": str(reservation_duration)}
 
             print("No criteria found")
@@ -218,29 +219,29 @@ class MQTTThread(threading.Thread):
                     reservation = self.get_reservation_from_reservations(user_id, table_number, check_in_date,
                                                                          check_in_time)
 
-                    is_reserved = False
+                    statuscode = reservation["Statuscode"]
 
-                    if (reservation["reserviert"] == 0):
-                        is_reserved = True
-                    else:
-                        is_reserved = False 
-
-                    if is_reserved:
+                    if statuscode == 0:
                         reservation_date = reservation["Datum"]
                         reservation_time = reservation["Uhrzeit"]
                         reservation_duration = reservation["Dauer"]
+                        
+                        statuscode = reservation["Statuscode"]
+                        
+                        
 
                         response = {"ID": user_id, "Tischnummer": table_number, "Versionsnummer": version_number,
                                     "Reservierungsdatum": reservation_date, "Reservierungsuhrzeit": reservation_time,
-                                    "Reservierungsdauer": reservation_duration, "reserviert": is_reserved}
+                                    "Reservierungsdauer": reservation_duration, "Statuscode": statuscode}
 
                     else:
+                        statuscode = reservation["Statuscode"]
                         next_reservation_time = reservation["Nächste Reservierung"]
                         if next_reservation_time is None:
                             next_reservation_time = "None"
 
                         response = {"ID": user_id, "Tischnummer": table_number, "Versionsnummer": version_number,
-                                    "Nächste Reservierung": next_reservation_time, "reserviert": is_reserved}
+                                    "Nächste Reservierung": next_reservation_time, "Statuscode": statuscode}
 
                     client.publish("denkraum/response", json.dumps(response))
                     print("Response sent. Result of Reservation", response)
