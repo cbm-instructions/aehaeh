@@ -1,7 +1,7 @@
-from RPi import GPIO
+#from RPi import GPIO
 from flask import Flask, render_template
 from flask_socketio import SocketIO
-from mfrc522 import SimpleMFRC522
+#from mfrc522 import SimpleMFRC522
 import sqlite3
 import paho.mqtt.client as mqtt
 import threading
@@ -28,7 +28,7 @@ class MQTTThread(threading.Thread):
         self.port = port
         self.username = username
         self.password = password
-        self.interval = 60
+        self.interval = 15
 
     def find_next_reservation_if_exists(self, table_number, check_in_date, check_in_time):
         connection = sqlite3.connect("reservations.db")
@@ -88,9 +88,10 @@ class MQTTThread(threading.Thread):
             # Es existiert keine Reservierung. Der Tisch kann verwendet werden bis eine neue Reservierung ansteht.
             # WICHTIG: next_reservation_time kann auch den Typen None haben
             if not rows:
+                print("a")
                 next_reservation_time = self.find_next_reservation_if_exists(table_number, check_in_date,
                                                                              check_in_time_rounded)
-                return {"Statuscode": row[5], "Nächste Reservierung": next_reservation_time}
+                return {"Statuscode": "-1", "Nächste Reservierung": next_reservation_time}
 
             # Es wurden Reservierungen zu dem Nutzer für diesen Tag gefunden. Es wird geprüft, ob
             # es sich um die Reservierung des Nutzers handelt. Dieser darf maximal 20 Minüten zu spät auftauchen.
@@ -100,6 +101,7 @@ class MQTTThread(threading.Thread):
                 reservation_date = datetime.strptime(row[2], "%d.%m.%Y")
                 reservation_duration = row[4]
                 reservation_statuscode = row[5]
+                print(reservation_statuscode)
                 print("Reservierung gefunden.")
                 # Eine Reservierung ist dann gültig, wenn
                 # - Die Reservierung vor oder zur selben Zeit des check-ins stattfindet
@@ -112,13 +114,14 @@ class MQTTThread(threading.Thread):
                     print("Reservierungs-Uhrzeit:", reservation_time.strftime("%H:%M"), "Aktuelle-Uhrzeit:",
                           check_in_time,
                           "Maximale-Uhrzeit", max_time.strftime("%H:%M"))
+                
                     return {"Statuscode": reservation_statuscode, "Datum": str(reservation_date.strftime("%d.%m.%Y")),
                             "Uhrzeit": reservation_time.strftime("%H:%M"), "Dauer": str(reservation_duration)}
 
             print("No criteria found")
             next_reservation_time = self.find_next_reservation_if_exists(table_number, check_in_date,
                                                                          check_in_time_rounded)
-            return {"reserviert": False, "Nächste Reservierung": next_reservation_time}
+            return {"Statuscode": "-1", "reserviert": False, "Nächste Reservierung": next_reservation_time}
 
         finally:
             cursor.close()
@@ -178,6 +181,7 @@ class MQTTThread(threading.Thread):
                 "UPDATE Reservations SET Statuscode = '1' WHERE ID=? AND Tischnummer=? AND Datum=? AND Uhrzeit=?",
                 (user_id, table_number, reservation_date, reservation_clock_time)
             )
+            
             connection.commit()
         finally:
             cursor.close()
@@ -202,6 +206,7 @@ class MQTTThread(threading.Thread):
                     user_id = message["ID"]
                     table_number = message["Tischnummer"]
                     reservation_date = message["Reservierungsdatum"]
+                
                     reservation_clock_time = message["Reservierungsuhrzeit"]
 
                     self.check_out_from_reservation(user_id, table_number, reservation_date, reservation_clock_time)
@@ -213,30 +218,57 @@ class MQTTThread(threading.Thread):
                     version_number = message["Versionsnummer"]
                     table_number = message["Tischnummer"]
                     current_datetime = datetime.now()
+                    
                     check_in_date = current_datetime.strftime("%d.%m.%Y")
                     check_in_time = current_datetime.strftime("%H:%M")
+                    
 
                     reservation = self.get_reservation_from_reservations(user_id, table_number, check_in_date,
                                                                          check_in_time)
 
+                    print(reservation)
                     statuscode = reservation["Statuscode"]
 
-                    if statuscode == 0:
+                    if statuscode == "0":
                         reservation_date = reservation["Datum"]
                         reservation_time = reservation["Uhrzeit"]
-                        reservation_duration = reservation["Dauer"]
-                        
+                        reservation_duration = reservation["Dauer"]    
                         statuscode = reservation["Statuscode"]
                         
+                        
+                        
+                        reservierungs_dateobject = datetime.strptime(reservation_time,"%H:%M")                        
+                        checkin_dateobject = datetime.strptime(check_in_time,"%H:%M")
+
+                        difference_in_minutes = int((checkin_dateobject - reservierungs_dateobject).total_seconds() / 60)
+                        print("time")
+                        print(difference_in_minutes)
+
+                    
+                        if difference_in_minutes >= 15:
+                             self.check_out_from_reservation(user_id, table_number, reservation_date, reservation_time)
+                             statuscode = "5"
                         
 
                         response = {"ID": user_id, "Tischnummer": table_number, "Versionsnummer": version_number,
                                     "Reservierungsdatum": reservation_date, "Reservierungsuhrzeit": reservation_time,
                                     "Reservierungsdauer": reservation_duration, "Statuscode": statuscode}
+                        print(response)
 
                     else:
                         statuscode = reservation["Statuscode"]
-                        next_reservation_time = reservation["Nächste Reservierung"]
+                        print(statuscode)
+                        
+                                    ## Rundet die aktuelle Uhrzeit im 15 Minuten Takt auf
+                        check_in_time_dt = datetime.strptime(check_in_time, "%H:%M")
+                        check_in_time_rounded = check_in_time_dt
+
+                        minutes_remainder = check_in_time_rounded.minute % 15
+                        if minutes_remainder != 0:
+                            check_in_time_rounded += timedelta(minutes=(15 - minutes_remainder))
+                        next_reservation_time = self.find_next_reservation_if_exists(table_number, check_in_date,
+                                                                             check_in_time_rounded)
+                        
                         if next_reservation_time is None:
                             next_reservation_time = "None"
 
@@ -272,7 +304,7 @@ os.system('clear')  # clear screen, this is just for the OCD purposes
 step = 5  # linear steps for increasing/decreasing volume
 
 # tell to GPIO library to use logical PIN names/numbers, instead of the physical PIN numbers
-GPIO.setmode(GPIO.BCM)
+#GPIO.setmode(GPIO.BCM)
 # set up the pins we have been using
 clk = 17
 dt = 18
@@ -280,17 +312,17 @@ back = 27
 ok = 22
 
 # set up the GPIO events on those pins
-GPIO.setup(clk, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(dt, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(back, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(ok, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+#GPIO.setup(clk, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+#GPIO.setup(dt, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+#GPIO.setup(back, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+#GPIO.setup(ok, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 # get the initial states
 counter = 0
-clkLastState = GPIO.input(clk)
-dtLastState = GPIO.input(dt)
-backLastState = GPIO.input(back)
-okLastState = GPIO.input(back)
+#clkLastState = GPIO.input(clk)
+#dtLastState = GPIO.input(dt)
+#backLastState = GPIO.input(back)
+#okLastState = GPIO.input(back)
 
 id_counter = 0
 current_user_values = {
@@ -299,6 +331,7 @@ current_user_values = {
     "Datum": "",
     "Uhrzeit": "",
     "Dauer": "",
+    "Statuscode": "-1",
 }
 
 
@@ -308,7 +341,7 @@ def reset_current_user_values():
     current_user_values["Datum"] = ""
     current_user_values["Uhrzeit"] = ""
     current_user_values["Dauer"] = ""
-    current_user_values["Statuscode"] = "0"
+    current_user_values["Statuscode"] = "-1"
 
 
 def create_table_reservations():
@@ -366,13 +399,14 @@ def write_reservation_to_database():
     connection = sqlite3.connect("reservations.db")
     cursor = connection.cursor()
     try:
-        query = "INSERT INTO Reservations(ID,Tischnummer, Datum, Uhrzeit, Dauer) VALUES (?,?,?,?,?)"
+        query = "INSERT INTO Reservations(ID,Tischnummer, Datum, Uhrzeit, Dauer,Statuscode) VALUES (?,?,?,?,?,?)"
         values = (
             current_user_values["ID"],
             current_user_values["Tisch Nr."],
             current_user_values["Datum"],
             current_user_values["Uhrzeit"],
             current_user_values["Dauer"],
+            current_user_values["Statuscode"],
         )
         if current_user_values["ID"] != "" and current_user_values["Tisch Nr."] != "" and current_user_values[
             "Datum"] != "" and current_user_values["Uhrzeit"] != "" and current_user_values["Dauer"] != "":
@@ -456,25 +490,25 @@ def finish_reservation(value):
         reset_current_user_values()
 
 
-def read_rfid_thread():
-   reader = SimpleMFRC522()
-   try:
-       while True:
-           id = reader.read_id()
-           current_user_values["ID"] = str((hex(id)))[4:10]
-           #current_user_values["ID"] = hex(id)
-           # print(current_user_values["ID"])
-           if current_user_values["ID"] != "":
-               break
-   finally:
-       socketio.emit("rfid_id", {"id": current_user_values["ID"]})
+#def read_rfid_thread():
+#   reader = SimpleMFRC522()
+#   try:
+#       while True:
+#           id = reader.read_id()
+#           current_user_values["ID"] = str((hex(id)))[4:10]
+#           #current_user_values["ID"] = hex(id)
+#           # print(current_user_values["ID"])
+#           if current_user_values["ID"] != "":
+#               break
+#   finally:
+#       socketio.emit("rfid_id", {"id": current_user_values["ID"]})
 
 
-@socketio.on('read_rfid')
-def read_rfid(data):
-   if data == "read":
-       print("Read from RFID")
-       threading.Thread(target=read_rfid_thread).start()
+#@socketio.on('read_rfid')
+#def read_rfid(data):
+#   if data == "read":
+#       print("Read from RFID")
+#       threading.Thread(target=read_rfid_thread).start()
 
 socketio.on('button')
 def update_current_user_values(data):
@@ -489,46 +523,46 @@ def update_current_user_values(data):
         socketio.emit('new_value', {'ok': 'true'})
 
 
-def clkClicked(channel):
-   global counter
-   global step
+#def clkClicked(channel):
+#   global counter
+#   global step
 
-   clkState = GPIO.input(clk)
-   dtState = GPIO.input(dt)
+#   clkState = GPIO.input(clk)
+#   dtState = GPIO.input(dt)
 
-   if clkState == 0 and dtState == 1:
-       counter = counter + step
-       socketio.emit('new_value', {'left': 'true'})
-       print("Counter ", counter)
-
-
-def dtClicked(channel):
-   global counter
-   global step
-
-   clkState = GPIO.input(clk)
-   dtState = GPIO.input(dt)
-
-   if clkState == 1 and dtState == 0:
-       counter = counter - step
-       socketio.emit('new_value', {'right': 'true'})
-       print("Counter ", counter)
+#   if clkState == 0 and dtState == 1:
+#       counter = counter + step
+#       socketio.emit('new_value', {'left': 'true'})
+#       print("Counter ", counter)
 
 
-def backClicked(channel):
-   socketio.emit('new_value', {'back': 'true'})
-   print("Back clicked")
+#def dtClicked(channel):
+#   global counter
+#   global step
+
+#  clkState = GPIO.input(clk)
+#   dtState = GPIO.input(dt)
+
+#   if clkState == 1 and dtState == 0:
+#       counter = counter - step
+#       socketio.emit('new_value', {'right': 'true'})
+#       print("Counter ", counter)
 
 
-def okClicked(channel):
-   socketio.emit('new_value', {'ok': 'true'})
-   print("Ok clicked")
+#def backClicked(channel):
+#   socketio.emit('new_value', {'back': 'true'})
+#   print("Back clicked")
 
 
-GPIO.add_event_detect(clk, GPIO.FALLING, callback=clkClicked, bouncetime=300)
-GPIO.add_event_detect(dt, GPIO.FALLING, callback=dtClicked, bouncetime=300)
-GPIO.add_event_detect(back, GPIO.FALLING, callback=backClicked, bouncetime=300)
-GPIO.add_event_detect(ok, GPIO.FALLING, callback=okClicked, bouncetime=300)
+#def okClicked(channel):
+#   socketio.emit('new_value', {'ok': 'true'})
+#   print("Ok clicked")
+
+
+#GPIO.add_event_detect(clk, GPIO.FALLING, callback=clkClicked, bouncetime=300)
+#GPIO.add_event_detect(dt, GPIO.FALLING, callback=dtClicked, bouncetime=300)
+#GPIO.add_event_detect(back, GPIO.FALLING, callback=backClicked, bouncetime=300)
+#GPIO.add_event_detect(ok, GPIO.FALLING, callback=okClicked, bouncetime=300)
 
 
 @app.route('/reservation_page')
@@ -547,13 +581,13 @@ def start_screen():
 
 
 if __name__ == '__main__':
-    broker_address = "localhost"
-    port = 1883
-    username = "user"
-    password = "Test123"
+    broker_address = "r24.exposed"
+    port = 8883
+    username = "chris"
+    password = "Leguan1337"
     mqtt_thread = MQTTThread(broker_address, port, username, password)
     mqtt_thread.start()
     app.run(debug=False, host='0.0.0.0')
     mqtt_thread.join()
 
-GPIO.cleanup()
+#GPIO.cleanup()
