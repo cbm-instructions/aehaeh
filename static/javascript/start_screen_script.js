@@ -122,20 +122,20 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    document.getElementById("button-go-to-reservation").addEventListener("click", function () {
-        socket.emit('button', 'ok');
-    });
+   // document.getElementById("button-go-to-reservation").addEventListener("click", function () {
+   //     socket.emit('button', 'ok');
+   // });
 
     socket.on('new_value', function (data) {
-        if (data['ok']) {
-            handleButtonClick('ok')
-        }
-        else if (data['left']){
+        if (data['left']){
             handleButtonClick('left')
         }
         else if (data['right']){
             handleButtonClick('right')
         }
+        //else if(data['ok']) {
+        //    handleButtonClick('ok')
+        //}
     });
     
     socket.on('rfid_id', function (data) {
