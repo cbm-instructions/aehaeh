@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function () {
                            let table_cell = row.getElementsByTagName("td")[hours+j];
 
                            if(hours+j > 52) break
-                           if(reservation_code == 0) {
+                           if(reservation_code === "-1") {
                                table_cell.style.backgroundColor = "red";
                            }
                            else {
@@ -143,13 +143,6 @@ document.addEventListener('DOMContentLoaded', function () {
             handleButtonClick('ok')
         }
     });
-        document.getElementById("button-turn-backward").addEventListener("click", function () {
-            socket.emit('button', 'right');
-        });
-
-        document.getElementById("button-turn-forward").addEventListener("click", function () {
-            socket.emit('button', 'left');
-        });
 
     socket.on('data_base_entries', function (data){
        if(data["value"]){

@@ -1,7 +1,7 @@
-#from RPi import GPIO
+from RPi import GPIO
 from flask import Flask, render_template
 from flask_socketio import SocketIO
-#from mfrc522 import SimpleMFRC522
+from mfrc522 import SimpleMFRC522
 import sqlite3
 import paho.mqtt.client as mqtt
 import threading
@@ -304,7 +304,7 @@ os.system('clear')  # clear screen, this is just for the OCD purposes
 step = 5  # linear steps for increasing/decreasing volume
 
 # tell to GPIO library to use logical PIN names/numbers, instead of the physical PIN numbers
-#GPIO.setmode(GPIO.BCM)
+GPIO.setmode(GPIO.BCM)
 # set up the pins we have been using
 clk = 17
 dt = 18
@@ -312,17 +312,17 @@ back = 27
 ok = 22
 
 # set up the GPIO events on those pins
-#GPIO.setup(clk, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-#GPIO.setup(dt, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-#GPIO.setup(back, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-#GPIO.setup(ok, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(clk, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(dt, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(back, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(ok, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 # get the initial states
 counter = 0
-#clkLastState = GPIO.input(clk)
-#dtLastState = GPIO.input(dt)
-#backLastState = GPIO.input(back)
-#okLastState = GPIO.input(back)
+clkLastState = GPIO.input(clk)
+dtLastState = GPIO.input(dt)
+backLastState = GPIO.input(back)
+okLastState = GPIO.input(back)
 
 id_counter = 0
 current_user_values = {
@@ -398,6 +398,7 @@ def read_all_reservations_for_user(user_id):
 def write_reservation_to_database():
     connection = sqlite3.connect("reservations.db")
     cursor = connection.cursor()
+    current_user_values["Datum"] = current_user_values["Datum"] + "2024"
     try:
         query = "INSERT INTO Reservations(ID,Tischnummer, Datum, Uhrzeit, Dauer,Statuscode) VALUES (?,?,?,?,?,?)"
         values = (
@@ -490,25 +491,25 @@ def finish_reservation(value):
         reset_current_user_values()
 
 
-#def read_rfid_thread():
-#   reader = SimpleMFRC522()
-#   try:
-#       while True:
-#           id = reader.read_id()
-#           current_user_values["ID"] = str((hex(id)))[4:10]
-#           #current_user_values["ID"] = hex(id)
-#           # print(current_user_values["ID"])
-#           if current_user_values["ID"] != "":
-#               break
-#   finally:
-#       socketio.emit("rfid_id", {"id": current_user_values["ID"]})
+def read_rfid_thread():
+   reader = SimpleMFRC522()
+   try:
+       while True:
+           id = reader.read_id()
+           current_user_values["ID"] = str((hex(id)))[4:10]
+           #current_user_values["ID"] = hex(id)
+           #print(current_user_values["ID"])
+           if current_user_values["ID"] != "":
+               break
+   finally:
+       socketio.emit("rfid_id", {"id": current_user_values["ID"]})
 
 
-#@socketio.on('read_rfid')
-#def read_rfid(data):
-#   if data == "read":
-#       print("Read from RFID")
-#       threading.Thread(target=read_rfid_thread).start()
+@socketio.on('read_rfid')
+def read_rfid(data):
+   if data == "read":
+       print("Read from RFID")
+       threading.Thread(target=read_rfid_thread).start()
 
 socketio.on('button')
 def update_current_user_values(data):
@@ -523,46 +524,46 @@ def update_current_user_values(data):
         socketio.emit('new_value', {'ok': 'true'})
 
 
-#def clkClicked(channel):
-#   global counter
-#   global step
+def clkClicked(channel):
+    global counter
+    global step
 
-#   clkState = GPIO.input(clk)
-#   dtState = GPIO.input(dt)
+    clkState = GPIO.input(clk)
+    dtState = GPIO.input(dt)
 
-#   if clkState == 0 and dtState == 1:
-#       counter = counter + step
-#       socketio.emit('new_value', {'left': 'true'})
-#       print("Counter ", counter)
-
-
-#def dtClicked(channel):
-#   global counter
-#   global step
-
-#  clkState = GPIO.input(clk)
-#   dtState = GPIO.input(dt)
-
-#   if clkState == 1 and dtState == 0:
-#       counter = counter - step
-#       socketio.emit('new_value', {'right': 'true'})
-#       print("Counter ", counter)
+    if clkState == 0 and dtState == 1:
+        counter = counter + step
+        socketio.emit('new_value', {'left': 'true'})
+        print("Counter ", counter)
 
 
-#def backClicked(channel):
-#   socketio.emit('new_value', {'back': 'true'})
-#   print("Back clicked")
+def dtClicked(channel):
+    global counter
+    global step
+
+    clkState = GPIO.input(clk)
+    dtState = GPIO.input(dt)
+
+    if clkState == 1 and dtState == 0:
+        counter = counter - step
+        socketio.emit('new_value', {'right': 'true'})
+        print("Counter ", counter)
 
 
-#def okClicked(channel):
-#   socketio.emit('new_value', {'ok': 'true'})
-#   print("Ok clicked")
+def backClicked(channel):
+    socketio.emit('new_value', {'back': 'true'})
+    print("Back clicked")
 
 
-#GPIO.add_event_detect(clk, GPIO.FALLING, callback=clkClicked, bouncetime=300)
-#GPIO.add_event_detect(dt, GPIO.FALLING, callback=dtClicked, bouncetime=300)
-#GPIO.add_event_detect(back, GPIO.FALLING, callback=backClicked, bouncetime=300)
-#GPIO.add_event_detect(ok, GPIO.FALLING, callback=okClicked, bouncetime=300)
+def okClicked(channel):
+    socketio.emit('new_value', {'ok': 'true'})
+    print("Ok clicked")
+
+
+GPIO.add_event_detect(clk, GPIO.FALLING, callback=clkClicked, bouncetime=300)
+GPIO.add_event_detect(dt, GPIO.FALLING, callback=dtClicked, bouncetime=300)
+GPIO.add_event_detect(back, GPIO.FALLING, callback=backClicked, bouncetime=300)
+GPIO.add_event_detect(ok, GPIO.FALLING, callback=okClicked, bouncetime=300)
 
 
 @app.route('/reservation_page')
@@ -581,13 +582,13 @@ def start_screen():
 
 
 if __name__ == '__main__':
-    broker_address = "r24.exposed"
-    port = 8883
-    username = "chris"
-    password = "Leguan1337"
+    broker_address = "localhost"
+    port = 1883
+    username = "user"
+    password = "Test123"
     mqtt_thread = MQTTThread(broker_address, port, username, password)
     mqtt_thread.start()
     app.run(debug=False, host='0.0.0.0')
     mqtt_thread.join()
 
-#GPIO.cleanup()
+GPIO.cleanup()

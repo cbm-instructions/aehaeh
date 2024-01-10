@@ -90,14 +90,6 @@ fetch('../static/JSON/data.json')
         }
 
 
-        document.getElementById("button-turn-backward").addEventListener("click", function () {
-            socket.emit('button', 'right');
-        });
-
-        document.getElementById("button-turn-forward").addEventListener("click", function () {
-            socket.emit('button', 'left');
-        });
-
         document.getElementById("button-left").addEventListener("click", function () {
             document.getElementById("button-right").removeAttribute("href");
             socket.emit('button', 'back');
@@ -160,10 +152,22 @@ fetch('../static/JSON/data.json')
             let firstValues = selectedData.firstValues;
             let secondValues = selectedData.secondValues;
             ulElement.innerHTML = '';
+            
+            if (labelElement.innerText == "Uhrzeit" && isSecondCircle && hour !== "") {
+                while(firstValues[3] != hour){
+                    firstValues.unshift(firstValues.pop())
+                }
+            }
 
             for (let i = 0; i < firstValues.length; i++) {
                 let liElement = document.createElement('li');
-                liElement.appendChild(document.createTextNode(firstValues[i]))
+                
+                if (labelElement.innerText == "Datum") {
+                    liElement.appendChild(document.createTextNode(firstValues[i].slice(0,6)))
+                }else {
+                    liElement.appendChild(document.createTextNode(firstValues[i]))
+                }
+                
                 ulElement.appendChild(liElement)
             }
             if (labelElement.innerText == "Uhrzeit") {

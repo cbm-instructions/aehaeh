@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function () {
     socket.on('display_current_user_values', function (data) {
         document.getElementById("ID").innerText = data["ID"];
         document.getElementById("Tischnummer").innerText = data["Tisch Nr."];
-        document.getElementById("Datum").innerText = data["Datum"];
+        document.getElementById("Datum").innerText = data["Datum"]+"2024";
         document.getElementById("Uhrzeit").innerText = data["Uhrzeit"];
         document.getElementById("Dauer").innerText = data["Dauer"];
     });
