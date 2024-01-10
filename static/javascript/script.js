@@ -147,7 +147,6 @@ fetch('../static/JSON/data.json')
         function updateDataDisplay() {
             let selectedData = data[dataTypeIndex];
             labelElement.innerText = selectedData["name"]
-            updateButtonDisplay();
             setBackground();
             let firstValues = selectedData.firstValues;
             let secondValues = selectedData.secondValues;
@@ -179,10 +178,6 @@ fetch('../static/JSON/data.json')
             }
         }
 
-        function updateButtonDisplay() {
-            const buttonLeft = document.getElementById("button-left");
-            buttonLeft.style.display = (labelElement.innerText != "Tisch Nr.") ? "block" : "none";
-        }
 
         function setBackground() {
             if (labelElement.innerText != "Uhrzeit") {
