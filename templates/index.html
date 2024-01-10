@@ -1,81 +1,355 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Divs drehen</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <link rel="stylesheet" href="../static/css/styles.css">
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../static/css/start_screen_styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=M+PLUS+2:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="../static/javascript/start_screen_script.js"></script>
+    <title>Startbildschirm</title>
 </head>
 <body>
-    <div class="filler"></div>
-    <ul class='circle-container'>
-        <li>1</li>
-        <li>2</li>
-        <li>3</li>
-        <li>4</li>
-        <li>5</li>
-        <li>6</li>
-        <li>7</li>
-        <li>8</li>
-    </ul>
-    <div class="label">
-        Tisch Nr.
+<div class="container">
+    <div class="row">
+        <div class="header_cell" style="font-weight: bold; font-size: 20px"><p>Denkraum</p><p>Gebäude A</p></div>
+        <div id="time" class="header_cell" style="font-weight: bold; font-size: 92px; text-align: center" ></div>
+        <div id="date" class="header_cell" style="font-weight: bold; font-size: 20px; text-align: right"><p>Mittwoch</p><p>10.01.2024</p></div>
     </div>
-    <div id="button-left" class="button" onclick="moveForward()">
-        Zurück
-        <div class="underline"></div>
+    <div class="row">
+        <div id="tischnr_cell" class="tischnr_cell" style="font-weight: bold; font-size: 50px; border-bottom: 2px solid black">Tisch Nr.
+            <div> 1</div>
+            <div> 2</div>
+            <div> 3</div>
+            <div> 4</div>
+            <div> 5</div>
+            <div> 6</div>
+            <div> 7</div>
+            <div> 8</div>
+        </div>
     </div>
-    <div id="button-right" class="button" onclick="moveBackward()">
-        Weiter
-        <div class="underline"></div>
+    <div class="table_row">
+        <div class="table_cell">
+            <table class="real_table" id="myTable">
+                <tr>
+                    <th id="header_spacing"></th>
+                    <th><p>07:00</p></th>
+                    <th>08:00</th>
+                    <th>09:00</th>
+                    <th>10:00</th>
+                    <th>11:00</th>
+                    <th>12:00</th>
+                    <th>13:00</th>
+                    <th>14:00</th>
+                    <th>15:00</th>
+                    <th>16:00</th>
+                    <th>17:00</th>
+                    <th>18:00</th>
+                    <th>19:00</th>
+                </tr>
+                <tr id="Montag">
+                    <td class="left_most">
+                        <p style="font-weight: bold">Mi.</p>
+                        <p style="font-weight: bold">10.</p>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td class="right_most"></td>
+                </tr>
+                <tr id="Dienstag">
+                    <td class="left_most">
+                        <p style="font-weight: bold">Do.</p>
+                        <p style="font-weight: bold">11.</p>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td class="right_most"></td>
+                </tr>
+                <tr id="Mittwoch">
+                    <td class="left_most">
+                        <p style="font-weight: bold">Fr.</p>
+                        <p style="font-weight: bold">12.</p>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td class="right_most"></td>
+                </tr>
+                <tr id="Donnerstag">
+                    <td class="left_most">
+                        <p style="font-weight: bold">Mo.</p>
+                        <p style="font-weight: bold">15.</p>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td class="right_most"></td>
+                </tr>
+                <tr id="Freitag">
+                    <td class="left_most">
+                        <p style="font-weight: bold">Di.</p>
+                        <p style="font-weight: bold">16.</p>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td class="right_most"></td>
+                </tr>
+            </table>
+        </div>
     </div>
-    <script>
-        const elements = document.querySelectorAll('.circle-container li');
-
-        function moveBackward() {
-            const firstElement = document.querySelector('.circle-container li');
-            //const lastElement = document.querySelector('.circle-container li:last-child');
-            //firstElement.style.transform = `rotate(${parseInt(firstElement.style.transform.split('(')[1]) + 45}deg) translate(10em) rotate(-${parseInt(firstElement.style.transform.split('(')[1]) + 45}deg)`;
-            document.querySelector('.circle-container').appendChild(firstElement);
-        }
-
-        function moveForward() {
-            //const firstElement = document.querySelector('.circle-container li');
-            const lastElement = document.querySelector('.circle-container li:last-child');
-            //lastElement.style.transform = `rotate(${parseInt(lastElement.style.transform.split('(')[1]) - 45}deg) translate(10em) rotate(-${parseInt(lastElement.style.transform.split('(')[1]) - 45}deg)`;
-            document.querySelector('.circle-container').prepend(lastElement);
-        }
-
-        var socket = io.connect('http://' + document.domain + ':' + location.port);
-
-        socket.on('connect', function() {
-            console.log('Connected to server');
-        });
-
-        socket.on('new_value', function(data) {
-            if (data.ok) {
-                alert("weiter");
-            }
-
-            // Wenn das Ereignis 'back' empfangen wird
-            if (data.back) {
-                alert("zurück");
-            }
-
-            // Wenn das Ereignis 'right' empfangen wird
-            if (data.right) {
-              moveForward();
-            }
-
-            // Wenn das Ereignis 'left' empfangen wird
-            if (data.left) {
-                moveBackward();
-            }
-        });
-    </script>
+</div>
+<div id="button-turn-backward" class="button">
+    Rückwärts
+    <div class="underline"></div>
+</div>
+<div id="button-turn-forward" class="button">
+    Vorwärts
+    <div class="underline"></div>
+</div>
+<div id="button-go-to-reservation" class="button">
+    Zur Reservierung
+    <div class="underline"></div>
+</div>
 </body>
 </html>

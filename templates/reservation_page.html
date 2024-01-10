@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Tischplaner</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="../static/css/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=M+PLUS+2:wght@400;500;600&display=swap"
+          rel="stylesheet">
+    <script src="../static/javascript/script.js"></script>
+</head>
+<body>
+<ul class='circle-container' id="circle-container"></ul>
+<ul class='circle-container' id="circle-container2"></ul>
+<div class="label" id="label"></div>
+<div id="button-left" class="button">
+    Zurück
+    <div class="underline"></div>
+</div>
+<div id="button-turn-backward" class="button">
+    Rückwärts
+    <div class="underline"></div>
+</div>
+<div id="button-turn-forward" class="button">
+    Vorwärts
+    <div class="underline"></div>
+</div>
+<div id="button-right" class="button">
+    Weiter
+    <div class="underline"></div>
+</div>
+</body>
+</html>
