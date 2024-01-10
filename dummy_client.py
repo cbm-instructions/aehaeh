@@ -51,14 +51,14 @@ def on_message(client, userdata, msg):
 
 def publish_message(client):
     print("Publishing a message...")
-    message = {"ID": "0", "Tischnummer": "5", "Versionsnummer": "012345"}
+    message = {"ID": "0", "Tischnummer": "5", "Versionsnummer": "012345", "Statuscode": "-1"}
     json_message = json.dumps(message)
     client.publish("denkraum/checkin", json_message)
     print(json_message)
 
 
 def checkout_from_reservation(client):
-    message = {"ID": "0", "Tischnummer": "5", "Reservierungsdatum": "13.12.2023", "Reservierungsuhrzeit": "16:25"}
+    message = {"ID": "045623", "Tischnummer": "1", "Reservierungsdatum": "10.01.2024", "Reservierungsuhrzeit": "14:36"}
     json_message = json.dumps(message)
     client.publish("Denkraum/checkout", json_message)
     print(json_message)
@@ -69,7 +69,7 @@ client.on_message = on_message  # Hier die Zuweisung vor dem Verbindungsaufbau
 client.username_pw_set("user", "Test123")
 client.connect(broker_address, port, 60)
 client.subscribe("denkraum/response")
-publish_message(client)
+#publish_message(client)
 checkout_from_reservation(client)
 client.loop_forever()
 

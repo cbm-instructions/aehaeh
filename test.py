@@ -172,14 +172,16 @@ class MQTTThread(threading.Thread):
                 cursor.close()
                 connection.close()
 
-    def check_out_from_reservation(self, user_id, table_number, reservation_date, reservation_clock_time):
+    def check_out_from_reservation(self, user_id, table_number, reservation_date, reservation_time):
         connection = sqlite3.connect("reservations.db")
         cursor = connection.cursor()
+        print("Statuscode was set to value 1")
+        print(user_id + " " + table_number + " " + reservation_date + " " + reservation_time)
 
         try:
             cursor.execute(
                 "UPDATE Reservations SET Statuscode = '1' WHERE ID=? AND Tischnummer=? AND Datum=? AND Uhrzeit=?",
-                (user_id, table_number, reservation_date, reservation_clock_time)
+                (user_id, table_number, reservation_date, reservation_time)
             )
             
             connection.commit()
@@ -207,9 +209,9 @@ class MQTTThread(threading.Thread):
                     table_number = message["Tischnummer"]
                     reservation_date = message["Reservierungsdatum"]
                 
-                    reservation_clock_time = message["Reservierungsuhrzeit"]
-
-                    self.check_out_from_reservation(user_id, table_number, reservation_date, reservation_clock_time)
+                    reservation_time = message["Reservierungsuhrzeit"]
+                    
+                    self.check_out_from_reservation(user_id, table_number, reservation_date, reservation_time)
 
                     print("Reservation was marked as completed!")
 
@@ -222,14 +224,15 @@ class MQTTThread(threading.Thread):
                     check_in_date = current_datetime.strftime("%d.%m.%Y")
                     check_in_time = current_datetime.strftime("%H:%M")
                     
-
+                    
+                    
                     reservation = self.get_reservation_from_reservations(user_id, table_number, check_in_date,
                                                                          check_in_time)
 
                     print(reservation)
                     statuscode = reservation["Statuscode"]
 
-                    if statuscode == "0":
+                    if statuscode == "-1":
                         reservation_date = reservation["Datum"]
                         reservation_time = reservation["Uhrzeit"]
                         reservation_duration = reservation["Dauer"]    
