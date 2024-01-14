@@ -23,12 +23,18 @@ def on_message(client, userdata, msg):
             print(msg.topic)
 
             if msg.topic == "denkraum/response":
-                is_reserved = message["reserviert"]
+                statuscode = message["Statuscode"]
                 user_id = message["ID"]
                 table_number = message["Tischnummer"]
                 version_number = message["Versionsnummer"]
 
-                if is_reserved:
+                if statuscode == "0":
+                    print("Keine Reservierung gefunden.")
+                    print("User ID: ", str(user_id), "---", "Tisch Nummer:", str(table_number), "---",
+                          "Versions Nummer:", str(version_number), "---", "Nächste Reservierung für diesen Tisch:",
+                          message["Nächste Reservierung"])
+
+                elif statuscode == "-1":
                     print("Reservierung wurde gefunden mit folgenden Daten:")
                     reservation_date = message["Reservierungsdatum"]
                     reservation_time = message["Reservierungsuhrzeit"]
@@ -39,29 +45,31 @@ def on_message(client, userdata, msg):
                           str(reservation_date), "um", str(reservation_time), "Uhr registriert worden und wurde für",
                           str(reservation_duration), "Minuten gebucht!")
                 else:
-                    print("Keine Reservierung gefunden")
+                    print("Reservierung ist entweder abgelaufen oder findet erst später statt.")
                     print("User ID: ", str(user_id), "---", "Tisch Nummer:", str(table_number), "---",
                           "Versions Nummer:", str(version_number), "---", "Nächste Reservierung für diesen Tisch:",
                           message["Nächste Reservierung"])
+
 
         except json.decoder.JSONDecodeError as e:
             print(f"Error decoding JSON: {e}")
             print("Invalid JSON format.")
 
 
-def publish_message(client):
+def checkin_to_reservation(client):
     print("Publishing a message...")
-    message = {"ID": "0", "Tischnummer": "5", "Versionsnummer": "012345", "Statuscode": "-1"}
+    message = {"ID": "0", "Tischnummer": "1", "Versionsnummer": "012345"}
     json_message = json.dumps(message)
     client.publish("denkraum/checkin", json_message)
     print(json_message)
 
 
 def checkout_from_reservation(client):
-    message = {"ID": "045623", "Tischnummer": "1", "Reservierungsdatum": "10.01.2024", "Reservierungsuhrzeit": "14:36"}
+    message = {"ID": "0", "Tischnummer": "4", "Reservierungsdatum": "20.01.2024", "Reservierungsuhrzeit": "10:45"}
     json_message = json.dumps(message)
     client.publish("Denkraum/checkout", json_message)
     print(json_message)
+
 
 client = mqtt.Client()
 client.on_connect = on_connect  # Hier die Zuweisung vor dem Verbindungsaufbau
@@ -69,8 +77,8 @@ client.on_message = on_message  # Hier die Zuweisung vor dem Verbindungsaufbau
 client.username_pw_set("user", "Test123")
 client.connect(broker_address, port, 60)
 client.subscribe("denkraum/response")
-#publish_message(client)
-checkout_from_reservation(client)
+checkin_to_reservation(client)
+#checkout_from_reservation(client)
 client.loop_forever()
 
-publish_message(client)
+checkin_to_reservation(client)

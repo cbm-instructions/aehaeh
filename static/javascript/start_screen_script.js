@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById("time").textContent =  formattedTime;
   }
     function displayReservationForTable(){
-           var today_day = 10;
+           var today_day = 17;
            for(let reservation of dataBaseEntries){
                console.log(reservation);
                 let reservation_table = reservation[1];
@@ -122,9 +122,16 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-   // document.getElementById("button-go-to-reservation").addEventListener("click", function () {
-   //     socket.emit('button', 'ok');
-   // });
+   // document.getElementById("button-turn-backward").addEventListener("click", function () {
+   //    socket.emit('button', 'right');
+   //});
+   //  document.getElementById("button-turn-forward").addEventListener("click", function () {
+   //    socket.emit('button', 'left');
+   //});
+
+   document.getElementById("button-go-to-reservation").addEventListener("click", function () {
+       socket.emit('button', 'ok');
+   });
 
     socket.on('new_value', function (data) {
         if (data['left']){
@@ -133,9 +140,9 @@ document.addEventListener('DOMContentLoaded', function () {
         else if (data['right']){
             handleButtonClick('right')
         }
-        //else if(data['ok']) {
-        //    handleButtonClick('ok')
-        //}
+        else if(data['ok']) {
+            handleButtonClick('ok')
+        }
     });
     
     socket.on('rfid_id', function (data) {
