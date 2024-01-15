@@ -31,13 +31,14 @@ Dazu haben wir einige Prototypen erstellt und mit Leonie getestet. Dabei haben w
 - 2x RFID Reader
 - 2x Druckschalter
 - Drehschalter
-- Sperrholzplatten
+- Sperrholzplatten 3.5mm
+- Holzbretter 10mm (Resteverwertung)
 - MakerBeams
 - Heißkleber
 - Holzöl
 - Acrylglasscheibe
 - Neopixel LED Ring
-- TFT Monitor
+- 1,3 " HD-IPS-TFT-LCD DISPLAY 
 - 3D Druck Filament
 - 2x ESP32
 - 9V Batterie
@@ -47,6 +48,7 @@ Dazu haben wir einige Prototypen erstellt und mit Leonie getestet. Dabei haben w
 - Kabel
 - WD40
 - Lötzinn
+- Unterlegscheiben
 
 ### Werkzeug
 - 3D Drucker
@@ -63,6 +65,27 @@ Dazu haben wir einige Prototypen erstellt und mit Leonie getestet. Dabei haben w
 
 ### Schritt 1: Schaltung bauen
 #### Schaltung für das Wanddisplay mit RFID Reader, Druckschalter und Drehschalter
+Wir haben den RFID Reader wie folgt eingebaut:
+![Schaltplan RFID](media/schaltplan_drehknopf.png)
+
+Der Drehknopf wurde wie folgt eingebaut: [Bildquelle](https://tutorials-raspberrypi.de/raspberry-pi-ky040-drehregler-lautstaerkeregler/)
+![Schaltplan Drehknopf](media/Raspberry-Pi-ky040_Steckplatine.webp)
+
+Die Buttons wurden mit einem Pulldown-Widerstand an noch freie GPIO-Pins des Raspberry Pi angeschlossen.
+Am Ende sah die Schaltung wie folgt aus:
+
+![Finale Schaltung](media/IMG_20231127_174057268.jpg)
+Zum Testen der Buttons wurden hier noch zusätzliche LEDs angeschlossen. Diese sind in der finalen Version jedoch nicht mehr eingebaut.
+
+#### Schaltung für das Tischgerät mit RFID Reader, TFT Panel und Neopixel LED Ring
+Der ESP32 wurde mit dem 1,3 " HD-IPS-TFT-LCD Display verbunden: [Bildquelle](https://joy-it.net/files/files/Produkte/SBC-LCD01/SBC-LCD01-Anleitung-29.09.2020.pdf)
+![Schaltplan ESP32](media/schaltung_esp.png)
+
+Der Neopixel LED Ring wurde wie folgt an den zweiten ESP32 eingebaut: [Bildquelle](https://blog.berrybase.de/neopixel-ring-mit-arduino-ansteuern-so-wirds-gemacht/)
+![Schaltplan Neopixel](media/esp_led_ring.png)
+
+Der RFID Reader wurde auch an den zweiten ESP32 angeschlossen: [Bildquelle](https://www.electronicwings.com/esp32/rfid-rc522-interfacing-with-esp32)
+![Schaltplan RFID](media/rfid_schaltplan.webp)
 
 ### Schritt 2: Gehäuse bauen
 #### Gehäuse für das Wanddisplay mit RFID Reader, Druckschalter und Drehschalter
@@ -71,3 +94,4 @@ Dazu haben wir einige Prototypen erstellt und mit Leonie getestet. Dabei haben w
 3. Frontplatte mit dem Lasercutter aus Sperrholz schneiden
 4. Display und Drehschalter in die Frontplatte einbauen
 ![Frontplatte](media/IMG_20231129_162638781.jpg)
+5. 
