@@ -110,10 +110,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
                            if(hours+j > 52) break
                            if(reservation_code === "-1") {
-                               table_cell.style.backgroundColor = "red";
+                               table_cell.style.backgroundColor = "orange";
                            }
-                           else {
+                           else if (reservation_code === "1"){
                             table_cell.style.backgroundColor = "grey";
+                           }
+                           else if (reservation_code === "2"){
+                            table_cell.style.backgroundColor = "red";
                            }
                        }
                    }
