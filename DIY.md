@@ -49,6 +49,11 @@ Dazu haben wir einige Prototypen erstellt und mit Leonie getestet. Dabei haben w
 - WD40
 - Lötzinn
 - Unterlegscheiben
+- Moosgummi
+- Schraubfüße
+- 5V Spannungswandler
+- HDMI auf VGA Adapter
+- Mehrfachsteckdose
 
 ### Werkzeug
 - 3D Drucker
@@ -62,6 +67,7 @@ Dazu haben wir einige Prototypen erstellt und mit Leonie getestet. Dabei haben w
 - Schrauben
 - Gewindeschneider
 - Zange
+- Multitool
 
 ### Schritt 1: Schaltung bauen
 #### Schaltung für das Wanddisplay mit RFID Reader, Druckschalter und Drehschalter
@@ -93,5 +99,57 @@ Der RFID Reader wurde auch an den zweiten ESP32 angeschlossen: [Bildquelle](http
 2. Display, Druckschalter und Drehschalter vermessen und Frontplatte in Inkscape zeichnen
 3. Frontplatte mit dem Lasercutter aus Sperrholz schneiden
 4. Display und Drehschalter in die Frontplatte einbauen
+5. Aufsatz für den Drehschalter in Autodesk Fusion 360 zeichnen
+6. Aufsatz für den Drehschalter mit dem 3D Drucker drucken
+7. Aufsatz für den Drehschalter mit dem Drehschalter verkleben
 ![Frontplatte](media/IMG_20231129_162638781.jpg)
-5. 
+8. Standfuß für das Display aus zwei Holzbrettern zusägen und mit einer Holzleiste im 90° Winkel verschrauben
+9. Unterseite des Standfußes mit Moosgummi bekleben, um rutschen zu verhindern
+10. Hintere Abdeckung des Displays abschrauben und montagelöcher auf den Standfuß übertragen
+11. Montagelöcher in den Standfuß bohren und mit dem Display verschrauben
+12. 3 mm breite Nut mit 2 mm Abstand zum Rand in alle vier Seitenkanten auf Vorder- und Rückseite der Frontplatte fräsen, damit die Frontplatte in die Zwischenräume der MakerBeams passt
+13. MakerBeams auf die richtige Länge für das Gehäuse zusägen
+14. Abgesägten Enden der MakerBeams mit WD40 einsprühen und mit einem Gewindeschneider ein Gewinde schneiden
+15. Frontplatte mit den MakerBeams verschrauben
+16. Seitenwände und Rückwand aus Sperrholz zusägen, dabei gravieren wir gleich eine Nut für die MakerBeams auf alle Seitenkanten ein.
+Hierbei ist zu beachten, dass der Lasercutter in x-Richtung schneller gravieren kann als in y-Richtung. Daher drehen wir die zurechtgeschnittenen Platten um 90°, um die Nut in y-Richtung zu gravieren.
+17. RFID Reader Logo auf Seitenwand gravieren
+18. MakerBeams Rahmen mit dem Standfuß verschrauben
+19. RFID Reader an die Seitenwand mit dem Logo kleben
+![RFID-Reader](media/20240108_170227.jpg)
+20. Seitenwände und Rückwand zwischen die MakerBeams einsetzen und mit den Schrauben der MakerBeams verschrauben
+21. Raspberry Pi mit Schraubfüßen auf die Rückseite der Frontplatte kleben
+22. Knöpfe und Widerstände an den Raspberry Pi anschließen und mit Lötzinn verlöten
+23. Monitor Steuerplatine an die Seite des Standfußes kleben
+24. HDMI auf VGA Adapter an Monitor anschließen
+25. Monitor mit dem Raspberry Pi verbinden
+26. Mehrfachsteckdose auf die Oberseite des Standfußes kleben
+27. Raspberry Pi und Monitor an die Mehrfachsteckdose anschließen
+28. Rückwand mit dem Standfuß verschrauben
+29. Gehäuse mit Holzöl einölen
+![Fertiges Grät](media/) //TODO Bild einfügen
+
+#### Gehäuse für das Tischgerät mit RFID Reader, TFT Panel und Neopixel LED Ring
+1. LED Ring, TFT Panel und RFID Reader vermessen
+2. Gehäuse in Autodesk Fusion 360 zeichnen, hierbei Nut zum Verschließen des Gehäuses nicht vergessen und genügend Platz für Kabel, ESP32 und Batterie lassen
+3. Testdruck des oberen Teils des Gehäuses mit dem 3D Drucker machen, damit der LED Ring, zwei Plexiglasringe und das TFT Panel in das Gehäuse passen
+![Gehäuse-Test](media/IMG_20231220_113028362.jpg)
+5. Gehäuse mit dem 3D Drucker drucken
+5. Stützmaterial entfernen und vergessenes Loch für Batterieschalter nachbohren
+![Gehäuse](media/WhatsApp Bild 2024-01-17 um 18.04.37_9747e687.jpg)
+6. Plexiglasringe mit dem Lasercutter ausschneiden
+7. TFT Panel, LED Ring, RFID Reader und Plexiglasringe in das Gehäuse einbauen und mit Heißkleber fixieren
+![Gehäuse](media/WhatsApp Bild 2024-01-17 um 18.05.11_c0da240e.jpg)
+8. ESP32 mit dem TFT Panel verbinden
+9. ESP32 mit dem RFID Reader und dem LED Ring verbinden
+10. ESPs mit Heißkleber im Gehäuse befestigen
+![Gehäuse](media/IMG_20240108_161101907.jpg)
+11. 9V Batterie mit dem Batterieschalter verbinden und mit Spannungswandler auf 5V herunterregeln
+12. 5V Spannungswandler mit dem ESPs verbinden
+13. Batterieschalter durch das Loch im Gehäuse führen und mit dem Gehäuse verschrauben
+![Batterieschalter](media/20240115_140532.jpg)
+14. Deckel für das Gehäuse in Inkscape zeichnen, hierbei Aussparung zum Öffnen des Gehäuses nicht vergessen
+15. Deckel mit dem Lasercutter aus dunklem Acrylglas schneiden
+16. Deckel in das Gehäuse einsetzen
+17. RFID Reader Logo mit Schneidplotter ausschneiden und auf das Gehäuse kleben
+![Fertiges Grät](media/20240115_140523.jpg)
