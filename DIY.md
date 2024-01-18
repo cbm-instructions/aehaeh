@@ -1,7 +1,7 @@
 # Team Äähh? - Bauanleitung Tisch-Reservierungs-Tool
 
 ## Challenge
-    Wie können wir durch smarte Devices dabei helfen, dass die Aufenthaltsqualität an der Hochschule steigt?
+    Wie können wir durch smarte Devices Leonie dabei helfen, dass die Aufenthaltsqualität an der Hochschule steigt?
 
 Ziel ist es, eine Lösung zu entwickeln, die die Aufenthaltsqualität an der Hochschule steigert.
 Um mögliche Probleme an der Hochschule zu identifizieren, haben wir uns mit den Studierenden und Proffesoren unterhalten
