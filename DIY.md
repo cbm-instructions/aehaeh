@@ -127,7 +127,7 @@ Hierbei ist zu beachten, dass der Lasercutter in x-Richtung schneller gravieren 
 27. Raspberry Pi und Monitor an die Mehrfachsteckdose anschließen
 28. Rückwand mit dem Standfuß verschrauben
 29. Gehäuse mit Holzöl einölen
-![Fertiges Grät](media/) //TODO Bild einfügen
+![Fertiges Grät](media/trt_display.jpg)
 
 #### Gehäuse für das Tischgerät mit RFID Reader, TFT Panel und Neopixel LED Ring
 1. LED Ring, TFT Panel und RFID Reader vermessen
