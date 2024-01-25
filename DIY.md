@@ -132,6 +132,7 @@ Hierbei ist zu beachten, dass der Lasercutter in x-Richtung schneller gravieren 
 #### Gehäuse für das Tischgerät mit RFID Reader, TFT Panel und Neopixel LED Ring
 1. LED Ring, TFT Panel und RFID Reader vermessen
 2. Gehäuse in Autodesk Fusion 360 zeichnen, hierbei Nut zum Verschließen des Gehäuses nicht vergessen und genügend Platz für Kabel, ESP32 und Batterie lassen
+![3D Modell](media/img.png)
 3. Testdruck des oberen Teils des Gehäuses mit dem 3D Drucker machen, damit der LED Ring, zwei Plexiglasringe und das TFT Panel in das Gehäuse passen
 ![Gehäuse-Test](media/IMG_20231220_113028362.jpg)
 5. Gehäuse mit dem 3D Drucker drucken
