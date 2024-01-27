@@ -69,6 +69,20 @@ Dazu haben wir einige Prototypen erstellt und mit Leonie getestet. Dabei haben w
 - Zange
 - Multitool
 
+### Software
+- Arduino IDE für beide ESP's mit Arduino interner Programmiersprache (C).
+- Inkspace (Laser Cutter)
+- Fusion 360 & Cura (3D-Drucker)
+- Mosquitto
+- Python3 auf dem Raspberry Pi
+
+### Empfohlene Vorkenntnisse
+- Erfahrung in den Programmiersprachen C, Python und JavaScript.
+- Erfahrung mit Lötkolben
+- Erfahrung mit Lasercutter
+- Erfahrung mit 3D-Druckern
+- Erfahrung mit verteilten Systemen (Speziell Broker und Socketverbindungen)
+
 ### Schritt 1: Schaltung bauen
 #### Schaltung für das Wanddisplay mit RFID Reader, Druckschalter und Drehschalter
 Wir haben den RFID Reader wie folgt eingebaut:
@@ -154,3 +168,28 @@ Hierbei ist zu beachten, dass der Lasercutter in x-Richtung schneller gravieren 
 16. Deckel in das Gehäuse einsetzen
 17. RFID Reader Logo mit Schneidplotter ausschneiden und auf das Gehäuse kleben
 ![Fertiges Grät](media/20240115_140523.jpg)
+
+### Code
+#### Frontend - Display
+Die Benutzeroberflächen im Frontend werden alle mit HTML, CSS und JavaScript realisiert. Die Verbindung zum Backend geschieht über Socket.IO Socket-Verbindungen.
+![Startseite](media/Startseite.jpg)
+Der Nutzer kann hier zu den einzelnen Tischen im Denkraum navigieren und damit aktuelle Reservierungen einsehen.
+![Reservierungsansicht](media/Reservierungsansicht.jpg)
+Durch diese Webansicht navigiert der Nutzer, um seine Reservierung zu konfigurieren.
+![Reservierungsverifizierung](media/Reservierungsverifizierung.jpg)
+Diese Webansicht zeigt die vom Nutzer ausgewählte Reservierungskonfiguration an. Der Nutzer kann nun seine Reservierung abschließen.
+
+#### Backend
+Das Backend wird auf dem Raspberry Pi ausgeführt. Es wurde vollständig in Python geschrieben und verwendet das Webframework Flask mit Socket.IO. Zur Speicherung und Verwaltung von Reservierungen wird eine SQLite Datenbank verwendet. Weiterhin wird die MQTT Library paho-mqtt benötigt, damit das Tischgerät mit dem Backend kommunizieren kann.
+
+Folgende Libraries werden mit den aufgelisteten Versionen als Requirements benötigt:
+
+```
+Flask>=2.2.2
+Flask-SocketIO==5.3.6
+RPi.GPIO==0.7.0
+paho-mqtt~=1.6.1
+```
+
+#### Das Tischgerät
+Das Tischgerät besteht aus 2 ESP32. Der Code ist in der Arduino IDE mit C geschrieben worden und wird auch darüber auf die beiden ESP32 hochgeladen. 
