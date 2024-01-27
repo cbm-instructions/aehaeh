@@ -172,11 +172,11 @@ Hierbei ist zu beachten, dass der Lasercutter in x-Richtung schneller gravieren 
 ### Code
 #### Frontend - Display
 Die Benutzeroberflächen im Frontend werden alle mit HTML, CSS und JavaScript realisiert. Die Verbindung zum Backend geschieht über Socket.IO Socket-Verbindungen.
-![Startseite](media/Startseite.jpg)
+![Startseite](media/Startseite.png)
 Der Nutzer kann hier zu den einzelnen Tischen im Denkraum navigieren und damit aktuelle Reservierungen einsehen.
-![Reservierungsansicht](media/Reservierungsansicht.jpg)
+![Reservierungsansicht](media/Reservierungsansicht.png)
 Durch diese Webansicht navigiert der Nutzer, um seine Reservierung zu konfigurieren.
-![Reservierungsverifizierung](media/Reservierungsverifizierung.jpg)
+![Reservierungsverifizierung](media/Reservierungsverifizierung.png)
 Diese Webansicht zeigt die vom Nutzer ausgewählte Reservierungskonfiguration an. Der Nutzer kann nun seine Reservierung abschließen.
 
 #### Backend
