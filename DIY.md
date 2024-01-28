@@ -149,9 +149,9 @@ Hierbei ist zu beachten, dass der Lasercutter in x-Richtung schneller gravieren 
 ![3D Modell](media/img.png)
 3. Testdruck des oberen Teils des Gehäuses mit dem 3D Drucker machen, damit der LED Ring, zwei Plexiglasringe und das TFT Panel in das Gehäuse passen
 ![Gehäuse-Test](media/IMG_20231220_113028362.jpg)
-5. Gehäuse mit dem 3D Drucker drucken
+4. Gehäuse mit dem 3D Drucker drucken
 5. Stützmaterial entfernen und vergessenes Loch für Batterieschalter nachbohren
-![Gehäuse](media/WhatsApp Bild 2024-01-17 um 18.04.37_9747e687.jpg)
+![Gehäuse](media/3d-druck-result.jpg)
 6. Plexiglasringe mit dem Lasercutter ausschneiden
 7. TFT Panel, LED Ring, RFID Reader und Plexiglasringe in das Gehäuse einbauen und mit Heißkleber fixieren
 ![Gehäuse](media/WhatsApp Bild 2024-01-17 um 18.05.11_c0da240e.jpg)
