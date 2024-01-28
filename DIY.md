@@ -239,7 +239,7 @@ Der bereitgestellte Quellcode ist für ein Tischgerät entworfen, das RFID-Karte
 
 7. **Debugging**:
    - Nutze das serielle Monitorfenster in der Arduino IDE, um Debug-Informationen einzusehen und zu überprüfen, ob das Gerät ordnungsgemäß funktioniert.
-   - Alle Ereignisse werden über disen Monitor ausgegeben.
+   - Alle Ereignisse werden über diesen Monitor ausgegeben.
   
 
 
@@ -274,7 +274,7 @@ Das ESP8266 Displaymodul ist Teil eines größeren Systems, das Informationen ü
 
 ### Hinweise
 - Stelle sicher, dass der ESP8266 während des Hochladevorgangs korrekt mit dem PC verbunden ist.
-- Möglicherweise musst du den Boot-Modus des ESP8266 aktivieren, indem du GPIO 0 mit Ground verbindest(nur bei wenigen Boards üblich).
+- Möglicherweise musst du den Boot-Modus des ESP8266 aktivieren, indem du GPIO 0 mit Ground verbindest (nur bei einigen Boards üblich).
 
 
 
