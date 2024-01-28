@@ -192,4 +192,90 @@ paho-mqtt~=1.6.1
 ```
 
 #### Das Tischgerät
-Das Tischgerät besteht aus 2 ESP32. Der Code ist in der Arduino IDE mit C geschrieben worden und wird auch darüber auf die beiden ESP32 hochgeladen. 
+Das Tischgerät besteht aus zwei ESP8266 Boards. Diese haben einen Chip um sich mit dem Wlan zu verbinden und darüber die Information auszutauschen. Der Code ist in der Arduino IDE mit C++ geschrieben worden und wird auch darüber auf die beiden ESP8266 hochgeladen. 
+
+
+
+## Programmierung und Hochladen des Quellcodes auf den ESP8266 (RFID + Ring)-Modul
+
+### Funktionsweise des RFID-Moduls(ESP8266 mit angeschlossenem RFID-Leser und LED-Ring)
+Der bereitgestellte Quellcode ist für ein Tischgerät entworfen, das RFID-Karten liest. Abhängig von der Karteninformation und der Backend-Reservierung werden verschiedene Aktionen ausgeführt. Zusätzlich sendet das Gerät Statusinformationen an ein ESP-basiertes Display. Bevor der Code auf den ESP8266 hochgeladen wird, ist es wichtig, ihn entsprechend den spezifischen Anforderungen des Projekts anzupassen.
+
+### Funktionsweise des Displaymoduls(ESP8266 mit angeschlossenem Display)
+- Das Displaymodul empfängt über MQTT Nachrichten mit Statusupdates und der aktuellen Uhrzeit.
+- Abhängig von den empfangenen Nachrichten zeigt das Display verschiedene Inhalte an.
+- Die Anzeige wird dynamisch aktualisiert, basierend auf den neuesten empfangenen Daten.
+
+### Schritte zum Hochladen des Codes auf den ESP8266(mit angeschlossenem RFID-Leser und LED-Ring)
+
+1. **Installieren der Arduino IDE**:
+   - Die Arduino IDE ist erforderlich, um den Code auf den ESP8266 hochzuladen. Sie kann von der [offiziellen Arduino-Website](https://www.arduino.cc/en/Main/Software) heruntergeladen werden.
+
+2. **Einrichten des ESP8266 in der Arduino IDE**:
+   - Wähle in der Arduino IDE unter `Tools > Board` den ESP8266 als Zielplattform aus.
+   - Wähle unter `Tools > Port` den entsprechenden COM-Port aus, an den der ESP8266 angeschlossen ist.
+
+3. **Öffnen des Quellcodes**:
+   - Öffne die Datei mit der Endung `.ino` des Projekts über `File > Open...`.
+
+4. **Installieren erforderlicher Bibliotheken**:
+   - Folgende Bibliotheken müssen über den Bibliotheksmanager (`Tools > Manage Libraries...`) installiert werden:
+     - `PubSubClient` für MQTT-Kommunikation.
+     - `ESP8266WiFi` für WLAN-Funktionen.
+     - `Adafruit_NeoPixel` zur Steuerung von NeoPixel LEDs(hier den 24 LED Ring).
+     - `ArduinoJson` für JSON-Verarbeitung.
+     - `MFRC522` zur RFID-Kartenlesefunktion.
+     - `SPI.h` für die SPI-Kommunikation.
+     - `Adafruit_GFX` als Basisgrafikbibliothek für Displays.
+     - `Adafruit_ST7789` zur Ansteuerung des ST7789-basierten Displays.
+
+5. **Anpassen des Quellcodes**:
+   - Überprüfe und ändere den Quellcode nach Bedarf.
+   - Die Netzwerkeinstellungen (SSID, Passwort) sind zu den tatsächlichen zu ändern.
+   - MQTT-Servereinstellungen (IP, Username + Passwort) sollten bearbeitet werden.
+
+6. **Hochladen des Quellcodes**:
+   - Klicke auf den Upload-Button in der Arduino IDE, um den Code auf den ESP8266 zu übertragen.
+
+7. **Debugging**:
+   - Nutze das serielle Monitorfenster in der Arduino IDE, um Debug-Informationen einzusehen und zu überprüfen, ob das Gerät ordnungsgemäß funktioniert.
+   - Alle Ereignisse werden über disen Monitor ausgegeben.
+  
+
+
+
+## Programmierung und Hochladen des Quellcodes auf das ESP8266 Displaymodul
+Das ESP8266 Displaymodul ist Teil eines größeren Systems, das Informationen über MQTT kommuniziert. Es empfängt Statusaktualisierungen und Uhrzeitinformationen über MQTT und zeigt diese auf einem Display an. Der Code für das Displaymodul ist in der Arduino IDE mit C++ geschrieben und wird von dort auf das ESP8266 hochgeladen.
+
+### Schritte zum Hochladen des Codes auf das ESP8266 Displaymodul
+
+1. **Voraussetzungen überprüfen**:
+   - Stelle sicher, dass die Arduino IDE bereits installiert ist, da sie benötigt wird, um den Code auf das ESP8266 Displaymodul zu übertragen.
+
+2. **ESP8266 in der Arduino IDE einrichten**:
+   - Falls notwendig, ändere in der Arduino IDE unter `Tools > Port` den COM-Port, um den aktuellen Anschluss des ESP8266 Displaymoduls zu reflektieren.
+
+3. **Öffnen des Quellcodes**:
+   - Öffne die Datei mit der Endung `.ino` des Displaymoduls über `File > Open...`.
+
+4. **Installieren erforderlicher Bibliotheken**:
+   - Die Bibliotheken `PubSubClient`, `ESP8266WiFi`, `Adafruit_GFX`, `Adafruit_ST7789`, `ArduinoJson` und `SPI.h` sollten bereits installiert sein, wie in vorherigen Schritten beschrieben.
+
+5. **Anpassung des Quellcodes**:
+   - Es sollte überprüft werden, ob der Quellcode Änderungen benötigt. 
+   - Netzwerkeinstellungen: SSID und Passwort sind gegebenenfalls zu aktualisieren.
+   - MQTT-Servereinstellungen: IP-Adresse, Benutzername und Passwort sind bei Bedarf anzupassen.
+
+6. **Hochladen des Quellcodes**:
+   - Klicke auf den Upload-Button in der Arduino IDE, um den Code auf das ESP8266 Displaymodul zu übertragen.
+
+7. **Debugging**:
+   - Verwende das serielle Monitorfenster in der Arduino IDE, um Debug-Informationen einzusehen und zu überprüfen, ob das Displaymodul ordnungsgemäß funktioniert.
+
+### Hinweise
+- Stelle sicher, dass der ESP8266 während des Hochladevorgangs korrekt mit dem PC verbunden ist.
+- Möglicherweise musst du den Boot-Modus des ESP8266 aktivieren, indem du GPIO 0 mit Ground verbindest(nur bei wenigen Boards üblich).
+
+
+
+
