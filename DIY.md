@@ -1,5 +1,36 @@
 # Team Äähh? - Bauanleitung Tisch-Reservierungs-Tool
 
+## Inhaltsverzeichnis
+- [Inhaltsverzeichnis](#inhaltsverzeichnis)
+- [Challenge](#challenge)
+    - [Problem](#problem)
+    - [Lösung](#lösung)
+- [Bauanleitung](#bauanleitung)
+    - [Material](#material)
+    - [Werkzeug](#werkzeug)
+    - [Software](#software)
+    - [Empfohlene Vorkenntnisse](#empfohlene-vorkenntnisse)
+    - [Schritt 1: Schaltung bauen](#schritt-1-schaltung-bauen)
+        - [Schaltung für das Wanddisplay mit RFID Reader, Druckschalter und Drehschalter](#schaltung-für-das-wanddisplay-mit-rfid-reader-druckschalter-und-drehschalter)
+        - [Schaltung für das Tischgerät mit RFID Reader, TFT Panel und Neopixel LED Ring](#schaltung-für-das-tischgerät-mit-rfid-reader-tft-panel-und-neopixel-led-ring)
+    - [Schritt 2: Gehäuse bauen](#schritt-2-gehäuse-bauen)
+        - [Gehäuse für das Wanddisplay mit RFID Reader, Druckschalter und Drehschalter](#gehäuse-für-das-wanddisplay-mit-rfid-reader-druckschalter-und-drehschalter)
+        - [Gehäuse für das Tischgerät mit RFID Reader, TFT Panel und Neopixel LED Ring](#gehäuse-für-das-tischgerät-mit-rfid-reader-tft-panel-und-neopixel-led-ring)
+    - [Code](#code)
+        - [Frontend - Display](#frontend---display)
+        - [Backend](#backend)
+        - [Das Tischgerät](#das-tischgerät)
+- [Programmierung und Hochladen des Quellcodes auf den ESP8266 (RFID + Ring)-Modul](#programmierung-und-hochladen-des-quellcodes-auf-den-esp8266-rfid--ring-modul)
+    - [Funktionsweise des RFID-Moduls(ESP8266 mit angeschlossenem RFID-Leser und LED-Ring)](#funktionsweise-des-rfid-modulsep8266-mit-angeschlossenem-rfid-leser-und-led-ring)
+    - [Funktionsweise des Displaymoduls(ESP8266 mit angeschlossenem Display)](#funktionsweise-des-displaymodulsep8266-mit-angeschlossenem-display)
+    - [Schritte zum Hochladen des Codes auf den ESP8266(mit angeschlossenem RFID-Leser und LED-Ring)](#schritte-zum-hochladen-des-codes-auf-den-esp8266mit-angeschlossenem-rfid-leser-und-led-ring)
+
+- [Programmierung und Hochladen des Quellcodes auf den ESP8266 (RFID + Ring)-Modul](#programmierung-und-hochladen-des-quellcodes-auf-den-esp8266-rfid--ring-modul)
+    - [Schritte zum Hochladen des Codes auf das ESP8266 Displaymodul](#schritte-zum-hochladen-des-codes-auf-das-esp8266-displaymodul)
+    - [Hinweise](#hinweise)
+- [Ausblick](#ausblick)
+
+
 ## Challenge
     Wie können wir durch smarte Devices Leonie dabei helfen, dass die Aufenthaltsqualität an der Hochschule steigt?
 
@@ -154,7 +185,7 @@ Hierbei ist zu beachten, dass der Lasercutter in x-Richtung schneller gravieren 
 ![Gehäuse](media/3d-druck-result.jpg)
 6. Plexiglasringe mit dem Lasercutter ausschneiden
 7. TFT Panel, LED Ring, RFID Reader und Plexiglasringe in das Gehäuse einbauen und mit Heißkleber fixieren
-![Gehäuse](media/WhatsApp Bild 2024-01-17 um 18.05.11_c0da240e.jpg)
+![Gehäuse](media/tischmodul-print.jpg)
 8. ESP32 mit dem TFT Panel verbinden
 9. ESP32 mit dem RFID Reader und dem LED Ring verbinden
 10. ESPs mit Heißkleber im Gehäuse befestigen
@@ -278,6 +309,7 @@ Das ESP8266 Displaymodul ist Teil eines größeren Systems, das Informationen ü
 - Stelle sicher, dass der ESP8266 während des Hochladevorgangs korrekt mit dem PC verbunden ist.
 - Möglicherweise musst du den Boot-Modus des ESP8266 aktivieren, indem du GPIO 0 mit Ground verbindest (nur bei einigen Boards üblich).
 
-
-
-
+## Ausblick
+Das Tisch-Reservierungs-Tool ist ein Prototyp, der in Zukunft noch weiterentwickelt werden kann. Hierzu haben wir einige Ideen gesammelt, die in Zukunft umgesetzt werden könnten:
+- Durch das Auflegen der Hochschulkarte könnte das Tischmodul automatisch eine Reservierung für eine festgelegte Zeit vornehmen.
+- Wenn Studierende sich ohne Reservierung an einen Tisch setzen, besteht die Möglichkeit, anzugeben, an welchem Projekt sie gerade arbeiten. Dadurch könnten sie andere Studierende mit ähnlichen Interessen kennenlernen. Diese Information könnten auf dem Wanddisplay angezeigt werden.
